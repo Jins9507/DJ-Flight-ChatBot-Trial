@@ -1,0 +1,51 @@
+<core:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:core="sap.ui.core"
+	xmlns:f="sap.f"
+	xmlns:card="sap.f.cards">
+	<Popover placement="Bottom" showHeader="false" contentWidth="363px">
+		<f:Card width="360px">
+			<f:header>
+				<!-- <card:Header title="Oliver Park"  iconSrc= "/images/OliverSSam.jpg" subtitle="Gold Member | VIP" /> -->
+				<card:Header title="{mockUser>/userName}"  iconSrc= "{mockUser>/profileIcon}" subtitle="{mockUser>/class} | {mockUser>/subscription}" />
+			</f:header>
+			<f:content>
+				<HBox alignItems="Center" justifyContent="SpaceBetween">
+					<card:NumericHeader
+						title="Number of Travel"
+						number="{mockUser>/numOfTravel}"
+						scale="time(s)"
+						state="Good">
+					</card:NumericHeader>			
+					<card:NumericHeader
+						title="Mileage"
+						number="{mockUser>/mileage}"
+						scale="M"
+						state="Good">
+					</card:NumericHeader>
+					<card:NumericHeader
+						iconSrc="sap-icon://paper-plane" 
+						iconBackgroundColor="Random">
+					</card:NumericHeader>
+				</HBox>
+			</f:content>
+		</f:Card>
+			<!-- <f:Card width="300px">
+				<f:header>
+					<card:NumericHeader
+						title="Sales Revenue"
+						subtitle="Sales revenue in the current quarter"
+						unitOfMeasurement="EUR"
+						number="2.16"
+						scale="M"
+						trend="Down"
+						state="Error">
+						<card:sideIndicators>
+							<card:NumericSideIndicator number="4.74" unit="M" title="Target" />
+							<card:NumericSideIndicator number="-54.49" unit="%" title="Deviation" />
+						</card:sideIndicators>
+					</card:NumericHeader>
+				</f:header>
+			</f:Card> -->
+	</Popover>
+</core:FragmentDefinition>

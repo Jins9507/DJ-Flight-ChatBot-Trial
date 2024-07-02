@@ -1,0 +1,229 @@
+<mvc:View
+	controllerName="chatbot.djchatbotai.controller.ReviewReservation"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.m"
+	xmlns:f="sap.f"
+    xmlns:tnt="sap.tnt"
+	xmlns:core="sap.ui.core"
+	xmlns:smartForm="sap.ui.comp.smartform"
+	xmlns:smartField="sap.ui.comp.smartfield"	
+	xmlns:form="sap.ui.layout.form"
+	xmlns:layout="sap.ui.layout"
+	height="100%">
+    <Page id="ReviewReservationPage" showHeader="false">
+        <content>
+            <tnt:ToolHeader id="justReserveHeader" class="sapUiSmallMarginBottom"
+                visible="{= ${routerModel>/createFlag}==='true' ? true : false}">
+                <Image src="/images/flight.jpg" decorative="false" press="onLogoPressed" tooltip="DJ Flight" width="8%" height="90%" class="sapUiSmallMarginEnd">
+                    <layoutData>
+                        <OverflowToolbarLayoutData priority="NeverOverflow"/>
+                    </layoutData>
+                </Image>
+                <Title text="Your Flight is completely reserved. [Reservation Number : {reserveModel>/reserveID}]" wrapping="false">
+                    <layoutData>
+                        <OverflowToolbarLayoutData priority="Disappear"/>
+                    </layoutData>
+                </Title>
+                <ToolbarSpacer />
+		    </tnt:ToolHeader>
+            <tnt:ToolHeader id="justCancelledHeard" class="sapUiSmallMarginBottom"
+                visible="{= ${reserveModel>/cancelFlag}==='true' ? true : false}">
+                <Image src="/images/flight2.jpg" decorative="false" press="onLogoPressed" tooltip="DJ Flight" width="8%" height="90%" class="sapUiSmallMarginEnd">
+                    <layoutData>
+                        <OverflowToolbarLayoutData priority="NeverOverflow"/>
+                    </layoutData>
+                </Image>
+                <Title text="Your Flight is canceled successfully. [Reservation Number : {reserveModel>/reserveID}]" wrapping="false">
+                    <layoutData>
+                        <OverflowToolbarLayoutData priority="Disappear"/>
+                    </layoutData>
+                </Title>
+                <ToolbarSpacer />
+		    </tnt:ToolHeader>
+            <!-- <form:SimpleForm
+                visible="{= ${routerModel>/createFlag}==='false' ? true : false}"
+                title="{
+                    text : 'Your Flight is completely reserved',
+                    level : 'H6',
+                    emphasized : true
+                }"
+                editable="false"
+                layout="ResponsiveGridLayout">
+                <form:content>
+                    <Label text="Chosen payment type"/>
+                    <Text text="{reserveModel>/payment}"/>
+                    <Label text="Payment status"/>
+                    <Text text="{= ${reserveModel>/paidFlag}==='true'?'Paid':'Not Paid'}"/>
+                    <Label text="Reserved Date"/>
+                    <Text text="{ path : 'reserveModel>/reserveDate', formatter : '.formatDate' }"/>
+                </form:content>
+            </form:SimpleForm> -->
+            <form:SimpleForm
+                title="1. Flight Shchedule"
+                editable="false"
+                layout="ResponsiveGridLayout">
+	
+                <Label text="Reservation Number"/>
+                <Text text="{reserveModel>/reserveID}"/>								
+                <Label text="Flight Number"/>
+                <Text text="{reserveModel>/carrid}{reserveModel>/connid}"/>								
+                <Label text="From"/>
+                <Text text="{reserveModel>/cityfrom}"/>
+                <Label text="To"/>
+                <Text text="{reserveModel>/cityto}"/>						
+                <Label text="Flight Date"/>
+                <Text text="{ path : 'reserveModel>/fldate', formatter : '.formatDate' }"/>		
+                <Label text="Departure Time"/>
+                <Text text="{ path : 'reserveModel>/deptime', formatter : '.formatTime' }"/>		
+                <Label text="Arrival Time"/>
+                <Text text="{ path : 'reserveModel>/arrtime', formatter : '.formatTime' }"/>	
+                <Label text="Passenger"/>
+                <Text text="{reserveModel>/passenger}"/>	
+
+                <ObjectHeader
+                    icon="sap-icon://travel-expense"
+                    imageShape="Circle"
+                    title="Total Cost"
+                    responsive="true"
+                    intro="This is the total cost of your journey"
+                    titleLevel="H1"
+                    number="{
+                        parts:[{path:'reserveModel>/totalPrice'},{path:'reserveModel>/currency'}],
+                        type: 'sap.ui.model.type.Currency',
+                        formatOptions: {showMeasure: false}
+                    }"
+                    numberUnit="{reserveModel>/currency}"	
+                    numberState="Information"	
+                    >
+                </ObjectHeader>					
+            </form:SimpleForm>
+            <form:SimpleForm
+                title="2. Payment"
+                editable="false"
+                layout="ResponsiveGridLayout">
+                <form:content>
+                    <Label text="Chosen Payment Type"/>
+                    <Text text="{reserveModel>/payment}"/>
+                    <Label text="Payment Status"/>
+                    <Text text="{= ${reserveModel>/cancelFlag}==='true'?'Refunded':(${reserveModel>/paidFlag}==='true'?'Paid':'Not Paid')}"/>
+                    <Label text="Reserved Date"/>
+                    <Text text="{ path : 'reserveModel>/reserveDate', formatter : '.formatDate' }"/>
+                </form:content>
+            </form:SimpleForm>
+
+            <form:SimpleForm
+                visible="{= ${reserveModel>/payment}==='Credit Card' ? true : false}"
+                title="3. Credit Card payment"
+                editable="false"
+                layout="ResponsiveGridLayout">
+                <form:content>
+                    <Label text="Name on card"/>
+                    <Text text="{reserveModel>/cardName}"/>
+                    <Label text="Card Number"/>
+                    <Text text="{reserveModel>/cardNumber}"/>
+                    <Label text="Security Code"/>
+                    <Text text="{reserveModel>/cardSecureCode}"/>
+                    <Label text="Expiration Date"/>
+                    <Text text="{ path : 'reserveModel>/cardExpire', formatter : '.formatDate' }"/>
+                </form:content>
+            </form:SimpleForm>
+
+            <form:SimpleForm
+                visible="{= ${reserveModel>/payment}==='Bank Transfer' ? true : false}"
+                title="3. Bank Transfer"
+                minWidth="1024"
+                editable="false"
+                layout="ResponsiveGridLayout">
+                <form:content>
+                    <layout:Grid
+                        defaultSpan="L6 M6 S10"
+                        hSpacing="2">
+                        <Label text="Beneficiary Name" design="Bold"/>
+                        <Label text="Singapore Hardware e-Commerce LTD"/>
+                        <Label text="Beneficiary Bank" design="Bold"/>
+                        <Label text="CITY BANK, SINGAPORE BRANCH"/>
+                        <Label text="Beneficiary Account Number" design="Bold"/>
+                        <Label text="06110702027218"/>
+                        <Label text="Bank Phone Number" design="Bold"/>
+                        <Label text="+65-6224-2622"/>
+                        <Label text="Bank Email Address" design="Bold"/>
+                        <Label text="customerservice@citybank.com"/>
+                    </layout:Grid>
+                </form:content>
+            </form:SimpleForm>
+
+            <form:SimpleForm
+                title="4. Passenger Infomation"
+                editable="false"
+                layout="ResponsiveGridLayout">
+                <form:content>			
+                    <core:Title text="Passenger 1" />					
+                    <Label text="Passport No."/>
+                    <Text text="{reserveModel>/passengerInfo/0/passportNo}"/>
+                    <Label text="Name"/>
+                    <Text text="{reserveModel>/passengerInfo/0/name}"/>
+                    <Label text="Gender"/>
+                    <Text text="{reserveModel>/passengerInfo/0/gender}"/>
+                    <Label text="Country"/>
+                    <Text text="{reserveModel>/passengerInfo/0/country}"/>
+                    <Label text="Birth"/>
+                    <Text text="{ path : 'reserveModel>/passengerInfo/0/birth', formatter : '.formatDate' }"/>							
+                    <Label text="Passport Expire Date"/>
+                    <Text text="{ path : 'reserveModel>/passengerInfo/0/expire', formatter : '.formatDate' }"/>		
+
+                    <core:Title text="Passenger 2"/>					
+                    <Label text="Passport No."/>
+                    <Text text="{reserveModel>/passengerInfo/1/passportNo}"/>
+                    <Label text="Name"/>
+                    <Text text="{reserveModel>/passengerInfo/1/name}"/>
+                    <Label text="Gender"/>
+                    <Text text="{reserveModel>/passengerInfo/1/gender}"/>
+                    <Label text="Country"/>
+                    <Text text="{reserveModel>/passengerInfo/1/country}"/>
+                    <Label text="Birth"/>
+                    <Text text="{ path : 'reserveModel>/passengerInfo/1/birth', formatter : '.formatDate' }"/>							
+                    <Label text="Passport Expire Date"/>
+                    <Text text="{ path : 'reserveModel>/passengerInfo/1/expire', formatter : '.formatDate' }"/>		
+
+
+                    <core:Title text="Passenger 3" />					
+                    <Label text="Passport No."/>
+                    <Text text="{reserveModel>/passengerInfo/2/passportNo}"/>
+                    <Label text="Name"/>
+                    <Text text="{reserveModel>/passengerInfo/2/name}"/>
+                    <Label text="Gender"/>
+                    <Text text="{reserveModel>/passengerInfo/2/gender}"/>
+                    <Label text="Country"/>
+                    <Text text="{reserveModel>/passengerInfo/2/country}"/>
+                    <Label text="Birth"/>
+                    <Text text="{ path : 'reserveModel>/passengerInfo/2/birth', formatter : '.formatDate' }"/>							
+                    <Label text="Passport Expire Date"/>
+                    <Text text="{ path : 'reserveModel>/passengerInfo/2/expire', formatter : '.formatDate' }"/>		
+
+                    <core:Title text="Passenger 4" />					
+                    <Label text="Passport No."/>
+                    <Text text="{reserveModel>/passengerInfo/3/passportNo}"/>
+                    <Label text="Name"/>
+                    <Text text="{reserveModel>/passengerInfo/3/name}"/>
+                    <Label text="Gender"/>
+                    <Text text="{reserveModel>/passengerInfo/3/gender}"/>
+                    <Label text="Country"/>
+                    <Text text="{reserveModel>/passengerInfo/3/country}"/>
+                    <Label text="Birth"/>
+                    <Text text="{ path : 'reserveModel>/passengerInfo/3/birth', formatter : '.formatDate' }"/>							
+                    <Label text="Passport Expire Date"/>
+                    <Text text="{ path : 'reserveModel>/passengerInfo/3/expire', formatter : '.formatDate' }"/>		
+                </form:content>
+            </form:SimpleForm>
+        </content>
+        <footer>
+            <Bar>
+                <contentRight>
+                    <Button text="Cancel Reservation" press="onCancelButtonPress" type="Attention" 
+                            visible="{= ${reserveModel>/cancelFlag}==='false' ? true : false}"/> 
+                    <Button text="Back" press="onBackButtonPress"/>
+                </contentRight>
+            </Bar>
+        </footer>
+    </Page>
+</mvc:View>

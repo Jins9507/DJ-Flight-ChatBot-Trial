@@ -1,0 +1,171 @@
+{
+  "_version": "1.59.0",
+  "sap.app": {
+    "id": "chatbot.djchatbotai",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "0.0.1"
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "resources": "resources.json",
+    "sourceTemplate": {
+      "id": "@sap/generator-fiori:basic",
+      "version": "1.13.6",
+      "toolsId": "44ce2831-6d3c-4835-aed5-a1ac50ad0725"
+    },
+    "dataSources": {
+      "mainService": {
+        "uri": "/sap/opu/odata/sap/ZUI_C_TRAVEL_DJ_010/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "localUri": "localService/metadata.xml",
+          "odataVersion": "2.0"
+        }
+      },
+      "filterModel": {
+        "uri": "model/filterModel.json",
+        "type": "JSON"
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": true,
+    "dependencies": {
+      "minUI5Version": "1.121.5",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.f": {},
+        "sap.suite.ui.generic.template": {},
+        "sap.ui.comp": {},
+        "sap.ui.generic.app": {},
+        "sap.ui.table": {},
+        "sap.ushell": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "chatbot.djchatbotai.i18n.i18n"
+        }
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {}
+      },
+      "filterModel": {
+        "dataSource": "filterModel",
+        "type": "sap.ui.model.json.JSONModel"
+      }
+    },
+    "resources": {
+      "css": [
+        {
+          "uri": "css/style.css"
+        }
+      ]
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "viewType": "XML",
+        "async": true,
+        "viewPath": "chatbot.djchatbotai.view",
+        "controlAggregation": "pages",
+        "controlId": "app",
+        "clearControlAggregation": false
+      },
+      "routes": [
+        {
+          "name": "RouteMain",
+          "pattern": ":?query:",
+          "target": [
+            "TargetMain"
+          ]
+        },
+        {
+          "pattern": "schedule/{?query}",
+          "name": "CheckFlight",
+          "target": [
+              "TargetCheck"
+          ]
+        },
+        {
+          "pattern": "schedule/reservation/{?query}",
+          "name": "Reservation",
+          "target": [
+              "Reservation"
+          ]
+        },
+        {
+          "pattern": "schedule/reviewReservation/{?query}",
+          "name": "ReviewReservation",
+          "target": [
+              "ReviewReservation"
+          ]
+        }
+      ],
+      "targets": {
+        "TargetMain": {
+          "viewType": "XML",
+          "transition": "slide",
+          "clearControlAggregation": false,
+          "viewId": "Main",
+          "viewName": "Main"
+        },
+        "TargetCheck": {  
+          "viewType": "XML",
+          "transition": "slide",
+          "clearControlAggregation": false,           
+          "viewId": "CheckFlight",      				
+          "viewName": "CheckFlight"
+        },
+        "Reservation": {  
+          "viewType": "XML",
+          "transition": "slide",
+          "clearControlAggregation": false,           
+          "viewId": "Reservation",      				
+          "viewName": "Reservation"
+        },
+        "ReviewReservation": {  
+          "viewType": "XML",
+          "transition": "slide",
+          "clearControlAggregation": false,           
+          "viewId": "ReviewReservation",      				
+          "viewName": "ReviewReservation"
+        }
+      }
+    },
+    "rootView": {
+      "viewName": "chatbot.djchatbotai.view.App",
+      "type": "XML",
+      "async": true,
+      "id": "App"
+    }
+  }
+}

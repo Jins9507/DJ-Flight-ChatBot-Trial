@@ -1,0 +1,57 @@
+{
+    "Passenger": "",
+    "LocationFrom": "FRA",
+    "LocationTo"  : "JFK",
+    "StartingPoint": [
+        {
+            "AirportID": "JFK",
+            "Country": "New York"
+        },
+        {
+            "AirportID": "SFO",
+            "Country": "San Francisco"
+        },
+        {
+            "AirportID": "FCO",
+            "Country": "Rome"
+        },
+        {
+            "AirportID": "TYO",
+            "Country": "Tokyo"
+        },
+        {
+            "AirportID": "FRA",
+            "Country": "Frankfurt"
+        },
+        {
+            "AirportID": "SIN",
+            "Country": "Singapore"
+        }
+    ],
+    "Destination": [
+        {
+            "AirportID": "JFK",
+            "Country": "New York"
+        },
+        {
+            "AirportID": "SFO",
+            "Country": "San Francisco"
+        },
+        {
+            "AirportID": "FCO",
+            "Country": "Rome"
+        },
+        {
+            "AirportID": "TYO",
+            "Country": "Tokyo"
+        },
+        {
+            "AirportID": "FRA",
+            "Country": "Frankfurt"
+        },
+        {
+            "AirportID": "SIN",
+            "Country": "Singapore"
+        }
+    ]
+}

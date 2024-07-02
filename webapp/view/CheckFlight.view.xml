@@ -1,0 +1,348 @@
+<mvc:View controllerName="chatbot.djchatbotai.controller.CheckFlight"
+	displayBlock="true"
+    xmlns:mvc="sap.ui.core.mvc" 
+	xmlns:layout="sap.ui.layout"	
+    xmlns:core="sap.ui.core"
+	xmlns:uxap="sap.uxap"
+	xmlns:t="sap.ui.table"
+	xmlns:f="sap.f" 	
+    xmlns="sap.m"
+    xmlns:fb="sap.ui.comp.filterbar"    
+    width="100%"
+	>
+		<f:DynamicPage id="dynamicPageId" headerExpanded="{/headerExpanded}" toggleHeaderOnTitleClick="{/titleClickable}">
+			<!-- DynamicPage Title -->
+			<f:title>
+				<f:DynamicPageTitle>
+					<f:heading>
+						<Title text="Flight Schedule"/>
+					</f:heading>
+					<f:breadcrumbs>
+						<Breadcrumbs>
+							<Link text="Home" press = "onNavigationBackPress"/>
+							<Link text="My Reservation" />
+						</Breadcrumbs>
+					</f:breadcrumbs>
+					<f:expandedContent>
+						<Label text="Maybe Search condition date input"/>
+					</f:expandedContent>
+					<f:snappedContent>
+						<Label text="{routerModel>/locationFromName} - {routerModel>/locationToName}, {routerModel>/Passenger} Person"/>
+					</f:snappedContent>
+					<f:snappedTitleOnMobile>
+						<Title text="This is a subheading"/>
+					</f:snappedTitleOnMobile>
+					<f:content>
+						<OverflowToolbar>
+							<GenericTag text = "{= ${mockUser>/class}?${mockUser>/class}:'Non-Member'}"
+								status="{= ${mockUser>/class} === 'Gold Member' ? 'Warning' : (${mockUser>/class} === 'Silver Member' ? 'None' : 'Success')}"
+								press="onPressOpenPopover"
+								design="StatusIconHidden">
+								<ObjectNumber number="|"
+									unit="VIP"
+									emphasized="false"
+									state="Error"/>
+							</GenericTag>
+						</OverflowToolbar>
+					</f:content>
+					<f:actions>
+						<Button
+								text="My Reservation"
+								type="Emphasized"
+								press="onDialogPress"
+                                ariaHasPopup="Dialog"/>
+						<Button
+								text="Clear"
+								type="Transparent"
+                                press="toggleAreaPriority"/>
+						<Button
+								icon="sap-icon://action"
+								type="Transparent"/>
+						<Button
+								text="Button with layoutData"
+								type="Transparent"
+								press="onPressOpenPopover">
+							<layoutData>
+								<OverflowToolbarLayoutData priority="AlwaysOverflow" closeOverflowOnInteraction="false" />
+							</layoutData>
+						</Button>
+					</f:actions>
+					<f:navigationActions>
+						<Button
+								icon="sap-icon://full-screen"
+								type="Transparent" />
+						<Button
+								icon="sap-icon://decline"
+								type="Transparent" />
+					</f:navigationActions>
+				</f:DynamicPageTitle>
+			</f:title>
+			<!-- DynamicPage Header -->
+			<f:header>
+				<f:DynamicPageHeader pinnable="true">
+					<layout:HorizontalLayout allowWrapping="true">
+						<!-- <layout:VerticalLayout class="sapUiMediumMarginEnd">
+							<ObjectAttribute title="From" text="{routerModel>/locationFromName}"/>
+							<ObjectAttribute title="To" text="{routerModel>/locationToName}"/>
+							<ObjectAttribute title="Passenger" text="{routerModel>/Passenger}"/>
+						</layout:VerticalLayout> -->
+						<layout:VerticalLayout class="sapUiMediumMarginEnd">
+							<ObjectAttribute title="From"/>
+                            <ObjectStatus text="{routerModel>/LocationFromName}" state="Information"/>
+						</layout:VerticalLayout>
+                        <layout:VerticalLayout class="sapUiMediumMarginEnd">
+							<ObjectAttribute title="To"/>
+                            <ObjectStatus text="{routerModel>/LocationToName}" state="Information"/>
+						</layout:VerticalLayout>
+                        <layout:VerticalLayout class="sapUiMediumMarginEnd">
+							<ObjectAttribute title="Passenger"/>
+                            <ObjectStatus text="{routerModel>/Passenger}" state="Information"/>
+						</layout:VerticalLayout>
+						<layout:VerticalLayout>
+							<ObjectAttribute title="Availability"/>
+							<ObjectStatus text="Total {=${testModel>/testTable}.length} Schedule Available in DJ Flight" state="Success"/>
+						</layout:VerticalLayout>
+					</layout:HorizontalLayout>
+                    <fb:FilterBar id="filterbar" persistencyKey="myPersKey" useToolbar="false" search=".onFilterSearch" showFilterConfiguration="false" filterChange=".onFilterChange" afterVariantLoad=".onAfterVariantLoad">
+                        <fb:filterGroupItems>
+                            <fb:FilterGroupItem name="sPoint" label="Starting Point" groupName="Group1" visibleInFilterBar="true">
+                                <fb:control>
+                                    <Select
+                                        name="starting_point"
+                                        selectedKey="{filterModel>/LocationFrom}"
+                                        items="{
+                                            path: 'filterModel>/StartingPoint',
+                                            sorter: { path: 'filterModel>Country' },
+                                            templateShareable: true
+                                        }"
+                                    >
+                                        <core:Item key="{filterModel>AirportID}" text="{filterModel>Country}"/>
+                                    </Select>
+                                    <!-- <MultiComboBox
+                                        name="starting_point"
+                                        selectionChange=".onSelectionChange"
+                                        items="{
+                                            path: 'filterModel>/StartingPoint',
+                                            sorter: { path: 'filterModel>Country' },
+                                            templateShareable: true
+                                        }"
+                                    >
+                                        <core:Item key="{filterModel>AirportID}" text="{filterModel>Country}"/>
+                                    </MultiComboBox> -->
+                                </fb:control>
+                            </fb:FilterGroupItem>
+                            <fb:FilterGroupItem name="Category" label="Destination" groupName="Group1" visibleInFilterBar="true">
+                                <fb:control>
+                                    <Select
+                                        name="destination"
+                                        selectedKey="{filterModel>/LocationTo}"
+                                        items="{
+                                            path: 'filterModel>/Destination',
+                                            sorter: { path: 'filterModel>Country' },
+                                            templateShareable: true
+                                        }"
+                                    >
+                                        <core:Item key="{filterModel>AirportID}" text="{filterModel>Country}"/>
+                                    </Select>
+                                </fb:control>
+                            </fb:FilterGroupItem>
+                            <fb:FilterGroupItem name="SupplierName" label="Passenger" groupName="Group1" visibleInFilterBar="true">
+                                <fb:control>
+                                    <Input
+                                        id="Passenger"
+                                        value="{filterModel>/Passenger}"
+                                        type = "Number"
+                                        editable="true"	
+                                        width="30%"/>	
+                                </fb:control>
+                            </fb:FilterGroupItem>
+                        </fb:filterGroupItems>
+                    </fb:FilterBar>
+				</f:DynamicPageHeader>
+			</f:header>
+			<f:content>
+            <t:Table 
+                id="schduleTable"
+                noData="No Flight schedule"
+                rows="{
+					path: 'scheduleModel>/results',						
+					sorter: [
+						{path: 'carrid'}, {path: 'connid'} 
+					]
+				}"
+                threshold = "50"
+                rowMode="Auto"
+                selectionMode="None"
+                selectionBehavior="RowSelector"
+                rowActionCount="1"
+                columnResize="onColumnResize"
+                enableColumnFreeze="true"
+                >
+                <t:extension>
+                    <OverflowToolbar design="Transparent">
+                        <Title text="Search {scheduleModel>/tableL} Rows" />
+                        <ToolbarSpacer/>
+                        <Button text="Test Button" type="Transparent" press=".onTestPress"/>
+                        <Button text="Test Button2" type="Emphasized" press=".onTestPress"/>
+                        <Button text="Test Button3" type="Attention" press=".onTestPress"/>
+                        <Button icon="sap-icon://ai" press=".onExportPress" />
+                    </OverflowToolbar>
+                </t:extension>
+                <t:rowActionTemplate>
+                    <t:RowAction>
+                        <t:RowActionItem type="Navigation" press=".onCellClick" visible="true"></t:RowActionItem>
+                    </t:RowAction>
+                </t:rowActionTemplate>
+                <t:columns>
+                    <!-- Airline -->
+                    <t:Column hAlign="Center" width="4rem" sortProperty="carrid" filterProperty="carrid">
+                        <Label text="Airline"/>
+                        <t:template>
+                            <Text text="{
+                                path: 'testModel>carrid',
+                                type: 'sap.ui.model.type.String'
+                            }"/>
+                        </t:template>
+                    </t:Column>
+                    <!-- Flight Code -->
+                    <t:Column hAlign="Center" width="6em" sortProperty="connid" filterProperty="connid" >
+                        <Label text="Flight Code" textAlign="Center"/>
+                        <t:template>
+                            <Text text="{testModel>connid}" wrapping="false" textAlign="Left"/>
+                        </t:template>
+                    </t:Column>
+                    <!-- Departure -->
+                    <t:Column  width="8em" hAlign="Left" sortProperty="cityfrom" filterProperty="cityfrom">
+                        <Label text="Departure" />
+                        <t:template>
+                            <Text text="{testModel>cityfrom}" wrapping="false"/>
+                        </t:template>
+                    </t:Column>
+                    <!-- Arrival -->
+                    <t:Column  width="8em" hAlign="Left" sortProperty="cityto" filterProperty="cityto">
+                        <Label text="Arrival" />
+                        <t:template>
+                            <Text text="{testModel>cityto}" wrapping="false"/>
+                        </t:template>
+                    </t:Column>
+                    <!-- Flight Date -->
+                    <t:Column  width="6em" hAlign="Left" sortProperty="fldate" filterProperty="fldate">
+                        <Label text="Flight Date" />
+                        <t:template>
+                            <Text text="{
+								path : 'testModel>fldate',
+                                formatter : '.formatDate'
+							}" wrapping="false"/>
+                        </t:template>
+                    </t:Column>
+                    <!-- Departure Time -->
+                    <t:Column  width="5em" hAlign="Center" sortProperty="deptime" filterProperty="deptime">
+                        <Label text="Dep.Time" />
+                        <t:template>
+                            <Text text="{ path : 'testModel>deptime', formatter : '.formatTime' }" wrapping="false"/>
+                        </t:template>
+                    </t:Column>
+                    <!-- Arrival Time -->
+                    <t:Column  width="5em" hAlign="Center" sortProperty="arrtime" filterProperty="arrtime">
+                        <Label text="Arr.Time" />
+                        <t:template>
+                            <Text text="{ path : 'testModel>arrtime', formatter : '.formatTime' }" wrapping="false"/>
+                            <!-- <Text text="{testModel>arrtime}" wrapping="false"/> -->
+                        </t:template>
+                    </t:Column>
+                    <!-- Economy -->
+                    <t:Column width="5em" hAlign="Center" sortProperty="seatocc" filterProperty="seatocc">
+                        <Label text="Economy" />
+                        <t:template>
+                            <Text text="{testModel>seatocc}" wrapping="false" />
+                        </t:template>
+                    </t:Column>
+                    <!-- Economy Fare -->
+                    <t:Column  width="4em" hAlign="Left" visible = "true" sortProperty="price" filterProperty="price">
+                        <Label text="Fare" />
+                        <t:template>
+                            <!-- <Text text="{testModel>price}" wrapping="false"/> -->
+                            <ObjectNumber
+                                class="sapUiSmallMarginBottom"
+                                binding="{testModel}"
+                                number="{
+                                        parts:[{path:'testModel>price'},{path:'testModel>currency'}],
+                                        type: 'sap.ui.model.type.Currency',
+                                        formatOptions: {showMeasure: false}
+                                    }"
+                                unit="{testModel>currency}"
+                                state="Warning" />
+                        </t:template>
+                    </t:Column>
+                    <!-- Business -->
+                    <t:Column  width="5em" hAlign="Center" visible = "true" sortProperty="seatocc_b" filterProperty="seatocc_b">
+                        <Label text="Business" />
+                        <t:template>
+                            <Text text="{testModel>seatocc_b}" wrapping="false"/>
+                        </t:template>
+                    </t:Column>
+                    <!-- Business Fare -->
+                    <t:Column hAlign="Center" width="4em" sortProperty="price_b" filterProperty="price_b">
+                        <Text text="Fare" /> 
+                        <t:template>
+                            <!-- <Text text="{testModel>price_b}" /> -->
+                            <ObjectNumber
+                                class="sapUiSmallMarginBottom"
+                                binding="{testModel}"
+                                number="{
+                                        parts:[{path:'testModel>price_b'},{path:'testModel>currency'}],
+                                        type: 'sap.ui.model.type.Currency',
+                                        formatOptions: {showMeasure: false}
+                                    }"
+                                unit="{testModel>currency}"
+                                state="Success" />                            
+                        </t:template>
+                    </t:Column>
+                    <!-- First -->
+                    <t:Column  width="4em" hAlign="Center" visible = "true" sortProperty="seatocc_f" filterProperty="seatocc_f">
+                        <Label text="First" />
+                        <t:template>
+                            <Text text="{testModel>seatocc_f}" wrapping="false"/>
+                        </t:template>
+                    </t:Column>
+                    <!-- First Fare -->
+                    <t:Column hAlign="Center" width="4em" sortProperty="price_f" filterProperty="price_f">
+                        <Text text="Fare" /> 
+                        <t:template>
+                            <!-- <Text text="{testModel>price_f}" /> -->
+                            <ObjectNumber
+                                class="sapUiSmallMarginBottom"
+                                binding="{testModel}"
+                                number="{
+                                        parts:[{path:'testModel>price_f'},{path:'testModel>currency'}],
+                                        type: 'sap.ui.model.type.Currency',
+                                        formatOptions: {showMeasure: false}
+                                    }"
+                                unit="{testModel>currency}"
+                                state="Information" />                            
+                        </t:template>
+                    </t:Column>
+                    <!-- Currency -->
+                    <!-- <t:Column hAlign="Center" width="5em" sortProperty="currency" filterProperty="currency">
+                        <Text text="Currency" /> 
+                        <t:template>
+                            <Text text="{testModel>currency}" />
+                        </t:template>
+                    </t:Column>					 -->
+                </t:columns>
+            </t:Table>  	
+		</f:content> 	
+		<f:footer>
+			<OverflowToolbar>
+				<Button icon="sap-icon://message-popup"
+						text="test"
+						type="Emphasized"
+						press="onMessageButtonPress"
+						visible="true"/>
+				<ToolbarSpacer/>
+				<Button type="Accept" text="Accept"/>
+				<Button type="Reject" text="Reject"/>
+			</OverflowToolbar>
+		</f:footer>
+	</f:DynamicPage>
+</mvc:View>

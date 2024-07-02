@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=https://sap.github.io/ui5-tooling/schema/ui5.yaml.json
+
+specVersion: "3.1"
+metadata:
+  name: chatbot.djchatbotai
+type: application
+builder:
+  resources:
+    excludes:
+      - /test/**
+      - /localService/**
+  customTasks:
+    - name: deploy-to-abap
+      afterTask: generateCachebusterInfo
+      configuration:
+        target:
+          destination: abap-cloud-default_abap-trial-4c9a6826trial-dev
+          url: https://8581cf25-e4bd-4b31-a78e-2d30182dcc48.abap.ap21.hana.ondemand.com
+          scp: true
+        app:
+          name: ZDJ_CHATBOT_AI
+          package: ZCHATBOT
+          transport: TRLK902716
+        exclude:
+          - /test/
