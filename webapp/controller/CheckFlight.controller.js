@@ -127,6 +127,8 @@ sap.ui.define([
                 this.oReserveDialog.then(function(oDialog){
                     oDialog.open();
                 }.bind(this));                
+
+                // test backup
             },
 
             onDialogSearch: function(){
