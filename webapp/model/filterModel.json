@@ -1,5 +1,19 @@
 {
-    "Passenger": "",
+    "DefaultP": "1",
+    "Passenger": [
+        {
+            "number" : 1 
+        },
+        {
+            "number" : 2 
+        },
+        {
+            "number" : 3 
+        },
+        {
+            "number" : 4 
+        }
+    ],
     "LocationFrom": "FRA",
     "LocationTo"  : "JFK",
     "StartingPoint": [

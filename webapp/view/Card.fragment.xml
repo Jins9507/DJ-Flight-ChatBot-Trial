@@ -7,19 +7,20 @@
 		<f:Card width="360px">
 			<f:header>
 				<!-- <card:Header title="Oliver Park"  iconSrc= "/images/OliverSSam.jpg" subtitle="Gold Member | VIP" /> -->
-				<card:Header title="{mockUser>/userName}"  iconSrc= "{mockUser>/profileIcon}" subtitle="{mockUser>/class} | {mockUser>/subscription}" />
+				<!-- <card:Header title="{userModel>/USERNAME}"  iconSrc= "{userModel>/PROFILEICON}" subtitle="{userModel>/CLASS} | {userModel>/SUBSCRIPTION}" /> -->
+				<card:Header title="{userModel>/USERNAME}"  iconSrc= "{userModel>/PROFILEICON}" subtitle="{userModel>/CLASS} | {userModel>/SUBSCRIPTION}" />
 			</f:header>
 			<f:content>
 				<HBox alignItems="Center" justifyContent="SpaceBetween">
 					<card:NumericHeader
 						title="Number of Travel"
-						number="{mockUser>/numOfTravel}"
+						number="{userModel>/NUMOFTRAVEL}"
 						scale="time(s)"
 						state="Good">
 					</card:NumericHeader>			
 					<card:NumericHeader
 						title="Mileage"
-						number="{mockUser>/mileage}"
+						number="{userModel>/MILEAGE}"
 						scale="M"
 						state="Good">
 					</card:NumericHeader>

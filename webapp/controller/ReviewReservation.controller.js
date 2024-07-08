@@ -1,12 +1,13 @@
-sap.ui.define(
-    [
+sap.ui.define([
         "sap/ui/core/mvc/Controller",
         "sap/ui/model/json/JSONModel",
         "sap/m/MessageBox",
         "sap/ui/core/Fragment",
         "sap/m/MessageToast",
+        "sap/ui/model/Filter",
+        "sap/ui/model/FilterOperator",
     ],
-    function(BaseController, JSONModel, MessageBox, Fragment, MessageToast) {
+    function(BaseController, JSONModel, MessageBox, Fragment, MessageToast, Filter, FilterOperator) {
       "use strict";
   
       return BaseController.extend("chatbot.djchatbotai.controller.ReviewReservation", {
@@ -26,19 +27,120 @@ sap.ui.define(
               oRouterModel.setProperty("/createFlag", oArgs['?query'].createFlag);
           }
 
-          var oUserModel = this.getOwnerComponent().getModel("mockUser");
-          var oReserveTable = this.getOwnerComponent().getModel("reservationTable"); // DB read 대용
-          var indexR = $.inArray(oRouterModel.getProperty("/reserveID"), $.map(oReserveTable.getProperty("/reservation"), function(n){
-              return n.reserveID
-          }));
-          var resultR = oReserveTable.getProperty("/reservation/"+indexR);
-          this.getView().setModel(new JSONModel(resultR), "reserveModel");
+          this._getUser();
+          this._getReservation(oRouterModel.getProperty("/reserveID"));
+          this._getPassenger(oRouterModel.getProperty("/reserveID"));
+          // this._setPassengerForm();
+
       },
-        
+      _getUser : function() {
+        var dfd = $.Deferred();
+
+        this.getOwnerComponent().getModel().read('/ZC_USER_INFO', {
+            filters : [ new Filter("USERID", FilterOperator.EQ, 'M000003') ],
+            success: function (oContent) {
+                dfd.resolve(oContent);
+                this.getOwnerComponent().getModel("userModel").setData(oContent?.results[0]);
+                console.log(oContent);
+            }.bind(this),
+            error: function (oError) {
+                dfd.reject(oError);
+                console.log(oError);
+            }.bind(this)
+        });
+
+        return dfd.promise();
+      },
+
+      _getReservation : function(pReserveID) {
+          var dfd = $.Deferred();
+
+          this.getOwnerComponent().getModel().read('/ZC_RESERVATION', {
+              filters : [ new Filter("RESERVEID", FilterOperator.EQ, pReserveID) ],
+              success: function (oContent) {
+                  this.getOwnerComponent().getModel("reservationModel").setData(oContent?.results);
+                  var oReserveTable = this.getOwnerComponent().getModel("reservationModel").getData()[0];
+                  this.getView().setModel(new JSONModel(oReserveTable), "reserveModel");
+                  dfd.resolve(oContent); 
+                  console.log(oContent);
+              }.bind(this),
+              error: function (oError) {
+                  dfd.reject(oError);
+                  console.log(oError);
+              }.bind(this)
+          });
+
+          return dfd.promise();
+      },
+
+      _getPassenger : function(pReserveID) {
+          var dfd = $.Deferred();
+
+          this.getOwnerComponent().getModel().read('/ZC_PASSENGER', {
+              filters : [ new Filter("RESERVEID", FilterOperator.EQ, pReserveID) ],
+              success: function (oContent) {
+                  this.getOwnerComponent().getModel("passengerModel").setData(oContent?.results);
+                  this._setPassengerForm();
+                  dfd.resolve(oContent); 
+                  console.log(oContent);
+              }.bind(this),
+              error: function (oError) {
+                  dfd.reject(oError);
+                  console.log(oError);
+              }.bind(this)
+          });
+
+          return dfd.promise();
+      },
+
+      _setPassengerForm: function () {
+        var oPassengerModel = this.getOwnerComponent().getModel("passengerModel"),
+            oForm1 = this.getView().byId("pForm1"),
+            oForm2 = this.getView().byId("pForm2"),
+            oForm3 = this.getView().byId("pForm3"),
+            oForm4 = this.getView().byId("pForm4");
+
+        if(oPassengerModel.getData().length < 2){
+            oForm1.setVisible(true);
+            oForm2.setVisible(false);
+            oForm3.setVisible(false);
+            oForm4.setVisible(false);
+        }else if(oPassengerModel.getData().length < 3){
+            oForm1.setVisible(true);
+            oForm2.setVisible(true);
+            oForm3.setVisible(false);
+            oForm4.setVisible(false);
+        }else if(oPassengerModel.getData().length < 4){
+            oForm1.setVisible(true);
+            oForm2.setVisible(true);
+            oForm3.setVisible(true);
+            oForm4.setVisible(false);
+        }else{
+            oForm1.setVisible(true);
+            oForm2.setVisible(true);
+            oForm3.setVisible(true);
+            oForm4.setVisible(true);                   
+        }
+      },
+
       formatDate: function(oDate) {
         var sReturnValue = "";
+        var vMonth, vDay;
+
         if (oDate) {
-           sReturnValue = oDate.slice(0, 4) + "-" + oDate.slice(4, 6) + "-" + oDate.slice(6, 8);
+            if (oDate.getMonth()+1<10){
+                vMonth = "0"+(oDate.getMonth()+1);
+            }else{
+                vMonth = oDate.getMonth()+1;
+            }
+
+            if (oDate.getDate()<10){
+                vDay = "0"+oDate.getDate();
+            }else{
+                vDay = oDate.getDate();
+            }
+
+           sReturnValue = oDate.getFullYear() + "-" + vMonth + "-" + vDay;
         }
         return sReturnValue;
       },

@@ -19,16 +19,6 @@ sap.ui.define([
         return Controller.extend("chatbot.djchatbotai.controller.CheckFlight", {
             onInit: function () {
                 this.getView().setModel(new JSONModel({}), "scheduleModel");
-                this.getOwnerComponent().getModel().read('/ZC_FLIGHT_SCHD', {
-                    success: function (oContent) {
-                        this.getView().getModel("scheduleModel").setProperty("/", oContent);
-                        console.log(oContent);
-                    }.bind(this),
-                    error: function (oError) {
-                        console.log(oError);
-                    }.bind(this)
-                });
-
                 this.getView().setModel(new JSONModel({}), "routerModel");
                 this.getOwnerComponent().getRouter().getRoute("CheckFlight").attachMatched(this._onRouteMatched, this);
             },
@@ -37,7 +27,7 @@ sap.ui.define([
                 var oArgs = oEvent.getParameter("arguments"),
                     oView = this.getView(),
                     oRouterModel = oView.getModel("routerModel");
-
+                
                 if (!oArgs["?query"]) return;
                 if (oArgs['?query']) {
                     oRouterModel.setProperty("/LocationFrom", oArgs['?query'].locationFrom);
@@ -46,26 +36,131 @@ sap.ui.define([
                     oRouterModel.setProperty("/LocationToName", oArgs['?query'].locationToName);
                     oRouterModel.setProperty("/Passenger", oArgs['?query'].Passenger);
                 }
+                
+                this._getSchedule();
+                this._getUser();
+                this._getReservation();
+                this._getPassenger();
+                
+                // aFilter.push(new Filter("AIRPFROM", FilterOperator.EQ, oRouterModel.getProperty("/LocationFrom")));
+                // aFilter.push(new Filter("AIRPTO", FilterOperator.EQ, oRouterModel.getProperty("/LocationTo")));
+                // var aFilter = [];
+                // var oTable = this.getView().byId("schduleTable");
+                // var oBinding = oTable.getBinding("rows");
+                // oBinding.filter(aFilter);    
+                // this.getView().getModel("scheduleModel").setProperty("/tableL", oBinding.iLength); 
+                // this.getOwnerComponent().getModel("filterModel").setProperty("/tableL", oBinding.iLength);
 
-                var aFilter = [];
-                var oTable = this.getView().byId("schduleTable");
-
-                aFilter.push(new Filter("AIRPFROM", FilterOperator.EQ, oRouterModel.getProperty("/LocationFrom")));
-                aFilter.push(new Filter("AIRPTO", FilterOperator.EQ, oRouterModel.getProperty("/LocationTo")));
-                var oBinding = oTable.getBinding("rows");
-                oBinding.filter(aFilter);    
-
-                this.getOwnerComponent().getModel("scheduleModel").setProperty("/tableL", oBinding.iLength);
                 this.getOwnerComponent().getModel("filterModel").setProperty("/LocationFrom", oRouterModel.getProperty("/LocationFrom"));
                 this.getOwnerComponent().getModel("filterModel").setProperty("/LocationTo", oRouterModel.getProperty("/LocationTo"));
                 // Validation 메세지 초기화
                 sap.ui.getCore().getMessageManager().removeAllMessages();
             },
 
+            _getSchedule : function() {
+                var dfd = $.Deferred(),
+                    aFilter = [],
+                    oRouterModel = this.getView().getModel("routerModel");
+
+                var oTable = this.getView().byId("schduleTable"),
+                    oBinding = oTable.getBinding("rows");
+
+                aFilter.push(new Filter("AIRPFROM", FilterOperator.EQ, oRouterModel.getProperty("/LocationFrom")));
+                aFilter.push(new Filter("AIRPTO", FilterOperator.EQ, oRouterModel.getProperty("/LocationTo")));                
+
+                this.getOwnerComponent().getModel().read('/ZC_FLIGHT_SCHD', {
+                    success: function (oContent) {
+                        oBinding.filter(aFilter);    
+                        this.getView().getModel("scheduleModel").setProperty("/", oContent);
+                        this.getView().getModel("scheduleModel").setProperty("/tableL", oBinding.iLength);
+                        dfd.resolve(oContent); 
+                        console.log(oContent);
+                    }.bind(this),
+                    error: function (oError) {
+                        dfd.reject(oError);
+                        console.log(oError);
+                    }.bind(this)
+                });
+
+                return dfd.promise();
+            },
+
+            _getUser : function() {
+                var dfd = $.Deferred();
+
+                this.getOwnerComponent().getModel().read('/ZC_USER_INFO', {
+                    filters : [ new Filter("USERID", FilterOperator.EQ, 'M000003') ],
+                    success: function (oContent) {
+                        dfd.resolve(oContent); 
+                        // this.getOwnerComponent().getModel("userModel").setData(oContent[results][0]); // results가 없을시 생성, 트리구조에서 좋음
+                        // this.getOwnerComponent().getModel("userModel").setProperty("/", oContent?.results[0]); // ? 을 붙이면 undefine이어도 에러가 뜨지 않는다
+                        this.getOwnerComponent().getModel("userModel").setData(oContent?.results[0]);
+                        console.log(oContent);
+                    }.bind(this),
+                    error: function (oError) {
+                        dfd.reject(oError);
+                        console.log(oError);
+                    }.bind(this)
+                });
+
+                return dfd.promise();
+            },
+
+            _getReservation : function() {
+                var dfd = $.Deferred();
+
+                this.getOwnerComponent().getModel().read('/ZC_RESERVATION', {
+                    filters : [ new Filter("USERID", FilterOperator.EQ, 'M000003') ],
+                    success: function (oContent) {
+                        this.getOwnerComponent().getModel("reservationModel").setData(oContent?.results);
+                        dfd.resolve(oContent); 
+                        console.log(oContent);
+                    }.bind(this),
+                    error: function (oError) {
+                        dfd.reject(oError);
+                        console.log(oError);
+                    }.bind(this)
+                });
+
+                return dfd.promise();
+            },
+
+            _getPassenger : function() {
+                var dfd = $.Deferred();
+
+                this.getOwnerComponent().getModel().read('/ZC_PASSENGER', {
+                    success: function (oContent) {
+                        this.getOwnerComponent().getModel("passengerModel").setData(oContent?.results);
+                        dfd.resolve(oContent); 
+                        console.log(oContent);
+                    }.bind(this),
+                    error: function (oError) {
+                        dfd.reject(oError);
+                        console.log(oError);
+                    }.bind(this)
+                });
+
+                return dfd.promise();
+            },
+
             formatDate: function(oDate) {
                 var sReturnValue = "";
+                var vMonth, vDay;
+
                 if (oDate) {
-                   sReturnValue = oDate.slice(0, 4) + "-" + oDate.slice(4, 6) + "-" + oDate.slice(6, 8);
+                    if (oDate.getMonth()+1<10){
+                        vMonth = "0"+(oDate.getMonth()+1);
+                    }else{
+                        vMonth = oDate.getMonth()+1;
+                    }
+
+                    if (oDate.getDate()<10){
+                        vDay = "0"+oDate.getDate();
+                    }else{
+                        vDay = oDate.getDate();
+                    }
+
+                   sReturnValue = oDate.getFullYear() + "-" + vMonth + "-" + vDay;
                 }
                 return sReturnValue;
             },
@@ -73,7 +168,7 @@ sap.ui.define([
             formatTime: function(oTime) {
                 var sReturnValue = "";
                 if (oTime) {
-                   sReturnValue = oTime.slice(0, 2) + ":" + oTime.slice(2, 4);
+                //    sReturnValue = oTime.slice(0, 2) + ":" + oTime.slice(2, 4);
                 }
                 return sReturnValue;
             },    
@@ -127,8 +222,6 @@ sap.ui.define([
                 this.oReserveDialog.then(function(oDialog){
                     oDialog.open();
                 }.bind(this));                
-
-                // test backup
             },
 
             onDialogSearch: function(){
@@ -136,27 +229,34 @@ sap.ui.define([
                 var vPassword = this.getView().byId("passwordInput").getProperty("value")
                 var resultR;
 
-                var oUserModel = this.getOwnerComponent().getModel("mockUser");
-                var oReserveTable = this.getOwnerComponent().getModel("reservationTable"); // DB read 대용
-
-                var indexR = $.inArray(vReservationNumber, $.map(oReserveTable.getProperty("/reservation"), function(n){
-                    return n.reserveID
+                var oReserveTable = this.getOwnerComponent().getModel("reservationModel");
+                var indexR = $.inArray(vReservationNumber, $.map(oReserveTable.getProperty("/"), function(n){
+                    return n.RESERVEID
                 }));
 
                 if(indexR !== -1){
-                    resultR = oReserveTable.getProperty("/reservation/"+indexR);
-                    if(resultR.password === vPassword){
-                        if(resultR.cancelFlag === "true"){
-                            this.getView().byId("reserveInput").setValue("");
-                            this.getView().byId("passwordInput").setValue("");
-                            MessageToast.show("The reservation number has already been canceled."); 
-                        }else{
-                            this.getOwnerComponent().getRouter().navTo("ReviewReservation", {                
-                                "?query": {
-                                    reserveID   : vReservationNumber,
-                                    createFlag  : "false"
-                                }                
-                            });     
+                    resultR = oReserveTable.getProperty("/"+indexR);
+                    if(resultR.PASSWORD === vPassword){
+                        switch (resultR.STATUSFLAG) {
+                            case "S":
+                                this.getView().byId("reserveInput").setValue("");
+                                this.getView().byId("passwordInput").setValue("");
+                                MessageToast.show("The reservation has already been completed.");                                 
+                                break;
+                            case "C":
+                                this.getView().byId("reserveInput").setValue("");
+                                this.getView().byId("passwordInput").setValue("");
+                                MessageToast.show("The reservation has already been canceled.");                                 
+                                break;
+                            case "P":
+                            case "N":
+                                this.getOwnerComponent().getRouter().navTo("ReviewReservation", {                
+                                    "?query": {
+                                        reserveID   : vReservationNumber,
+                                        createFlag  : "false"
+                                    }                
+                                });                                    
+                                break;
                         }
                     }else{
                         this.getView().byId("reserveInput").setValue("");
@@ -185,7 +285,7 @@ sap.ui.define([
                 var oDestination = ofilterModel.getProperty("/Destination"),
                     oLocationFrom = ofilterModel.getProperty("/LocationFrom"),
                     oLocationTo = ofilterModel.getProperty("/LocationTo"),
-                    oPassenger = ofilterModel.getProperty("/Passenger"),
+                    // oPassenger = ofilterModel.getProperty("/Passenger"),
                     indexF = $.inArray(oLocationFrom, $.map(oDestination, function(n){
                         return n.AirportID
                     })),
@@ -195,31 +295,32 @@ sap.ui.define([
                     })),
                     resultT = ofilterModel.getProperty("/Destination/"+indexT);
 
-                if( oPassenger == 0 ){
-                    var msg = 'Please Check the Passenger';
-                    MessageToast.show(msg);
-                    return;
-                }
+                // if( oPassenger == 0 ){
+                //     var msg = 'Please Check the Passenger';
+                //     MessageToast.show(msg);
+                //     return;
+                // }
 
-                aFilter.push(new Filter("airpfrom", FilterOperator.EQ, oLocationFrom));
-                aFilter.push(new Filter("airpto", FilterOperator.EQ, oLocationTo));
+                aFilter.push(new Filter("AIRPFROM", FilterOperator.EQ, oLocationFrom));
+                aFilter.push(new Filter("AIRPTO", FilterOperator.EQ, oLocationTo));
                 var oBinding = oTable.getBinding("rows");
                 oBinding.filter(aFilter);   
 
-                this.getOwnerComponent().getModel("scheduleModel").setProperty("/tableL", oBinding.iLength); 
+                this.getView().getModel("scheduleModel").setProperty("/tableL", oBinding.iLength); 
                 this.getView().getModel("routerModel").setProperty("/LocationFromName", resultF.Country); 
                 this.getView().getModel("routerModel").setProperty("/LocationToName", resultT.Country); 
-                this.getView().getModel("routerModel").setProperty("/Passenger", oPassenger); 
+                this.getView().getModel("routerModel").setProperty("/Passenger", ofilterModel.getData().DefaultP); 
+                // this.getView().getModel("routerModel").setProperty("/Passenger", oPassenger); 
 
             },
 
             onCellClick: function(oEvent) {
                 var oRecord = oEvent.getParameter('row'),
-                    oData = this.getView().getModel('testModel').getProperty(oRecord.oBindingContexts.testModel.sPath),
+                    oData = this.getView().getModel('scheduleModel').getProperty(oRecord.oBindingContexts.scheduleModel.sPath),
                     oRouterModel = this.getView().getModel("routerModel");
                 dupFlag = false;
-                this.checkReserve(oData.fldate, oData.carrid, oData.connid);
-                var path_num = oRecord.oBindingContexts.testModel.sPath.split("/")[2];     
+                this.checkReserve(oData.FLDATE);
+                var path_num = oRecord.oBindingContexts.scheduleModel.sPath.split("/")[2];     
 
                 if(dupFlag){
                     var oConfirm = MessageBox.confirm("A reservation already exists for that date. Do you want to proceed?", {
@@ -232,51 +333,56 @@ sap.ui.define([
                                 this.getOwnerComponent().getRouter().navTo("Reservation", {                
                                     "?query": {
                                         sPath           : path_num,
-                                        LocationFrom    : oData.airpfrom,
-                                        LocationFromName: oData.cityfrom,
-                                        LocationTo      : oData.airpto,
-                                        LocationToName  : oData.cityto,
+                                        FlightId        : oData.FLIGHTID,
+                                        LocationFrom    : oData.AIRPFROM,
+                                        LocationFromName: oData.CITYFROM,
+                                        LocationTo      : oData.AIRPTO,
+                                        LocationToName  : oData.CITYTO,
                                         Passenger       : oRouterModel.getProperty("/Passenger")
                                     }                
                             });    
-                                // this.getOwnerComponent().getRouter().navTo("RouteMain");  
                         }.bind(this), 
                     });       
                 }else{
                     this.getOwnerComponent().getRouter().navTo("Reservation", {                
                         "?query": {
                             sPath           : path_num,
-                            LocationFrom    : oData.airpfrom,
-                            LocationFromName: oData.cityfrom,
-                            LocationTo      : oData.airpto,
-                            LocationToName  : oData.cityto,
+                            FlightId        : oData.FLIGHTID,
+                            LocationFrom    : oData.AIRPFROM,
+                            LocationFromName: oData.CITYFROM,
+                            LocationTo      : oData.AIRPTO,
+                            LocationToName  : oData.CITYTO,
                             Passenger       : oRouterModel.getProperty("/Passenger")
                         }                
                     });                    
                 }
             },
 
-            checkReserve: function(sDate, sCarrid, sConnid){
+            checkReserve: function(sDate){
                 // DB 예약 테이블 조회하여 동일 항공편 예약 이력이 있는지 확인
                 var resultR;
-                var oUserModel = this.getOwnerComponent().getModel("mockUser");
-                var oReserveTable = this.getOwnerComponent().getModel("reservationTable"); // DB read 대용
+                var oReserveModel = this.getOwnerComponent().getModel("reservationModel");
+                var resv = [];
+                var indexR = null;
+                var _bCheck = false;
+                oReserveModel.getProperty("/").forEach((item, index) => {
+                    var _sDate = new Date(sDate).toString();
+                    if(new Date(item?.FLDATE).toString() == _sDate){
+                        _bCheck = true;
+                        resv.push(index);
+                        indexR = index;
+                    } 
+                })
 
-                // read 대용으로 해봤는데 다건은 고려하지 못함, 해당날짜의 데이터가 단건이라는 가정하에 진행 -> completeFlag
-                var indexR = $.inArray(sDate, $.map(oReserveTable.getProperty("/reservation"), function(n){
-                    return n.fldate
-                }));
-
-                // if ($.inArray('foo', array) == -1 && $.inArray('bar', array) == -1) {
-                //     // Neither foo or bar in array
-                // }
-
-                if(indexR !== -1){
-                    resultR = oReserveTable.getProperty("/reservation/"+indexR);
-                    if(resultR.userID === oUserModel.getProperty("/userId") && resultR.completeFlag === "false" 
-                       && resultR.cancelFlag === "false" && resultR.carrid === sCarrid && resultR.connid === sConnid)
+                if(!_bCheck) return;
+                resv.forEach((idx, n) => {
+                    resultR = oReserveModel.getProperty("/"+idx);
+                    if(resultR.STATUSFLAG === "N" || resultR.STATUSFLAG === "P"){
+                        console.log(idx);
                         dupFlag = true;
-                }
+                        return;
+                    }
+                })
             }
 
         });

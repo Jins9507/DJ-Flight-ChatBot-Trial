@@ -37,39 +37,20 @@
 							nextStep="PaymentTypeStep"
 							title="Confirm Flight Information"
 							icon="sap-icon://flight">
-							<!-- <ObjectHeader
-								icon="/images/testImage1.jpg"
-								iconDensityAware="false"
-								imageShape="Circle"
-								responsive="true"
-								intro="와~ 가격보소~"
-								title="Total Cost"
-								titleLevel="H1"
-								number="{
-									parts:[{path:'reserveModel>/total'},{path:'reserveModel>/reserve/currency'}],
-									type: 'sap.ui.model.type.Currency',
-									formatOptions: {showMeasure: false}
-								}"
-								numberUnit="{reserveModel>/reserve/currency}"	
-								numberState="Information"	
-								>
-								<attributes>
-									<ObjectAttribute text="This is the total cost of your journey"/>
-								</attributes>
-							</ObjectHeader> -->
+							<!-- icon="/images/OliverSSam.jpg" -->
 							<ObjectHeader
-								icon="/images/OliverSSam.jpg"
+								icon="sap-icon://travel-expense"
 								imageShape="Circle"
 								title="Total Cost"
 								responsive="true"
 								intro="This is the total cost of your journey"
 								titleLevel="H1"
 								number="{
-									parts:[{path:'reserveModel>/total'},{path:'reserveModel>/reserve/currency'}],
+									parts:[{path:'reserveModel>/total'},{path:'reserveModel>/reserve/CURRENCY'}],
 									type: 'sap.ui.model.type.Currency',
 									formatOptions: {showMeasure: false}
 								}"
-								numberUnit="{reserveModel>/reserve/currency}"	
+								numberUnit="{reserveModel>/reserve/CURRENCY}"	
 								numberState="Information"	
 								>
 							</ObjectHeader>							
@@ -77,22 +58,32 @@
 								layout="ResponsiveGridLayout">
 								<Label labelFor="rbg" text="Cabin Class" class="sapUiLargeMarginTop"/>								
 								<RadioButtonGroup id="rbg" columns="5" valueState="Information" class="sapUiMediumMarginTop" select="onRbgSelect">
-									<RadioButton id="RB3-1" text="Economy Class [ {reserveModel>/reserve/price} {reserveModel>/reserve/currency} ]" />
-									<RadioButton id="RB3-2" text="Business Class [ {reserveModel>/reserve/price_b} {reserveModel>/reserve/currency} ]" />
-									<RadioButton id="RB3-3" text="First Class [ {reserveModel>/reserve/price_f} {reserveModel>/reserve/currency} ]" />
+									<RadioButton id="RB3-1" text="Economy Class [ {reserveModel>/reserve/PRICE} {reserveModel>/reserve/CURRENCY} ]" />
+									<RadioButton id="RB3-2" text="Business Class [ {reserveModel>/reserve/PRICE_B} {reserveModel>/reserve/CURRENCY} ]" />
+									<RadioButton id="RB3-3" text="First Class [ {reserveModel>/reserve/PRICE_F} {reserveModel>/reserve/CURRENCY} ]" />
 								</RadioButtonGroup>								
 								<Label text="Flight number"/>
-								<Text text="{reserveModel>/reserve/carrid}{reserveModel>/reserve/connid}"/>								
+								<Text text="{reserveModel>/reserve/CARRID}{reserveModel>/reserve/CONNID}"/>								
 								<Label text="From"/>
-								<Text text="{reserveModel>/reserve/cityfrom}"/>
+								<Text text="{reserveModel>/reserve/CITYFROM}"/>
 								<Label text="To"/>
-								<Text text="{reserveModel>/reserve/cityto}"/>						
+								<Text text="{reserveModel>/reserve/CITYTO}"/>						
 								<Label text="Flight Date"/>
-								<Text text="{ path : 'reserveModel>/reserve/fldate', formatter : '.formatDate' }"/>		
+								<Text text="{ path : 'reserveModel>/reserve/FLDATE', formatter : '.formatDate' }"/>		
 								<Label text="Departure Time"/>
-								<Text text="{ path : 'reserveModel>/reserve/deptime', formatter : '.formatTime' }"/>		
+								<Text text="{
+									path: 'reserveModel>/reserve/DEPTIME', 
+									type: 'sap.ui.model.odata.type.Time', 
+									formatOptions: { style: 'long', pattern: 'HH:mm', UTC : false},
+									source: { pattern: 'HH:mm:ss' }
+								}" />	
 								<Label text="Arrival Time"/>
-								<Text text="{ path : 'reserveModel>/reserve/arrtime', formatter : '.formatTime' }"/>	
+								<Text text="{
+									path: 'reserveModel>/reserve/ARRTIME', 
+									type: 'sap.ui.model.odata.type.Time', 
+									formatOptions: { style: 'long', pattern: 'HH:mm', UTC : false},
+									source: { pattern: 'HH:mm:ss' }
+								}" />	
 								<Label text="Passenger"/>
 								<Text text="{routerModel>/Passenger}"/>																										
 							</form:SimpleForm>
@@ -164,7 +155,7 @@
 									<Label text="Bank Phone Number" design="Bold"/>
 									<Label text="+8210-6224-2622"/>
 									<Label text="Bank Email Address" design="Bold"/>
-									<Label text="customerservice@gukmin.co.kr"/>
+									<Label text="customerservice@djflight.co.kr"/>
 								</layout:Grid>
 							</Panel>
 						</WizardStep>
@@ -175,6 +166,8 @@
 							icon="sap-icon://person-placeholder">
 							<MessageStrip text="Enter at least 3 symbols for each required field. You only need to enter the representative passenger information."/>
 							<form:SimpleForm
+							    title="Passenger 1"
+							    id="passengerForm1"
 								editable="true"
 								layout="ColumnLayout">
 								<Label text="Passport No." required="true"/>
@@ -202,6 +195,96 @@
 								<DatePicker value="{reserveModel>/passenger/expire}" valueFormat = "yyyy-MM-dd"
                                             displayFormat = "yyyy-MM-dd" change="checkPassengerStep"/>								   
 							</form:SimpleForm>
+							<form:SimpleForm
+							    title="Passenger 2"
+							    id="passengerForm2"
+								editable="true"
+								layout="ColumnLayout">
+								<Label text="Passport No." required="true"/>
+								<Input value="{reserveModel>/passenger2/passportNo}" liveChange="checkPassengerStep"
+								       valueLiveUpdate="true"/>
+								<Label text="Name" required="true"/>
+								<Input value="{reserveModel>/passenger2/name}" liveChange="checkPassengerStep"
+								       valueLiveUpdate="true"/>
+								<Label text="Birth" required="true"/>
+								<DatePicker value="{reserveModel>/passenger2/birth}" valueFormat = "yyyy-MM-dd"
+                                            displayFormat = "yyyy-MM-dd" change="checkPassengerStep"/>
+								<Label text="Gender" required="true"/>
+								<Select
+									id="genderFrom2"
+									forceSelection="false"
+									selectedKey="{genderCombo2>/selectedKey}"
+									change="checkPassengerStep"
+									items="{genderCombo>/selectItems}">
+									<core:Item key="{genderCombo>itemText}" text="{genderCombo>itemText}" />
+								</Select>									
+								<Label text="Country" required="true"/>
+								<Input value="{reserveModel>/passenger2/country}" liveChange="checkPassengerStep"
+								       valueLiveUpdate="true"/>
+								<Label text="Passport Expire Date" required="true"/>
+								<DatePicker value="{reserveModel>/passenger2/expire}" valueFormat = "yyyy-MM-dd"
+                                            displayFormat = "yyyy-MM-dd" change="checkPassengerStep"/>								   
+							</form:SimpleForm>							
+							<form:SimpleForm
+							    title="Passenger 3"
+							    id="passengerForm3"
+								editable="true"
+								layout="ColumnLayout">
+								<Label text="Passport No." required="true"/>
+								<Input value="{reserveModel>/passenger3/passportNo}" liveChange="checkPassengerStep"
+								       valueLiveUpdate="true"/>
+								<Label text="Name" required="true"/>
+								<Input value="{reserveModel>/passenger3/name}" liveChange="checkPassengerStep"
+								       valueLiveUpdate="true"/>
+								<Label text="Birth" required="true"/>
+								<DatePicker value="{reserveModel>/passenger3/birth}" valueFormat = "yyyy-MM-dd"
+                                            displayFormat = "yyyy-MM-dd" change="checkPassengerStep"/>
+								<Label text="Gender" required="true"/>
+								<Select
+									id="genderFrom3"
+									forceSelection="false"
+									selectedKey="{genderCombo3>/selectedKey}"
+									change="checkPassengerStep"
+									items="{genderCombo>/selectItems}">
+									<core:Item key="{genderCombo>itemText}" text="{genderCombo>itemText}" />
+								</Select>									
+								<Label text="Country" required="true"/>
+								<Input value="{reserveModel>/passenger3/country}" liveChange="checkPassengerStep"
+								       valueLiveUpdate="true"/>
+								<Label text="Passport Expire Date" required="true"/>
+								<DatePicker value="{reserveModel>/passenger3/expire}" valueFormat = "yyyy-MM-dd"
+                                            displayFormat = "yyyy-MM-dd" change="checkPassengerStep"/>								   
+							</form:SimpleForm>							
+							<form:SimpleForm
+							    title="Passenger 4"
+							    id="passengerForm4"
+								editable="true"
+								layout="ColumnLayout">
+								<Label text="Passport No." required="true"/>
+								<Input value="{reserveModel>/passenger4/passportNo}" liveChange="checkPassengerStep"
+								       valueLiveUpdate="true"/>
+								<Label text="Name" required="true"/>
+								<Input value="{reserveModel>/passenger4/name}" liveChange="checkPassengerStep"
+								       valueLiveUpdate="true"/>
+								<Label text="Birth" required="true"/>
+								<DatePicker value="{reserveModel>/passenger4/birth}" valueFormat = "yyyy-MM-dd"
+                                            displayFormat = "yyyy-MM-dd" change="checkPassengerStep"/>
+								<Label text="Gender" required="true"/>
+								<Select
+									id="genderFrom4"
+									forceSelection="false"
+									selectedKey="{genderCombo>/selectedKey}"
+									change="checkPassengerStep"
+									items="{genderCombo4>/selectItems}">
+									<core:Item key="{genderCombo>itemText}" text="{genderCombo>itemText}" />
+								</Select>									
+								<Label text="Country" required="true"/>
+								<Input value="{reserveModel>/passenger4/country}" liveChange="checkPassengerStep"
+								       valueLiveUpdate="true"/>
+								<Label text="Passport Expire Date" required="true"/>
+								<DatePicker value="{reserveModel>/passenger4/expire}" valueFormat = "yyyy-MM-dd"
+                                            displayFormat = "yyyy-MM-dd" change="checkPassengerStep"/>								   
+							</form:SimpleForm>							
 						</WizardStep>
 					</Wizard>
 				</f:content>
@@ -230,17 +313,27 @@
 						<Label text="Passenger"/>
 						<Text text="{reserveModel>/passenger/name} et al."/>			
 						<Label text="Flight number"/>
-						<Text text="{reserveModel>/reserve/carrid}{reserveModel>/reserve/connid}"/>								
+						<Text text="{reserveModel>/reserve/CARRID}{reserveModel>/reserve/CONNID}"/>								
 						<Label text="From"/>
-						<Text text="{reserveModel>/reserve/cityfrom}"/>
+						<Text text="{reserveModel>/reserve/CITYFROM}"/>
 						<Label text="To"/>
-						<Text text="{reserveModel>/reserve/cityto}"/>						
+						<Text text="{reserveModel>/reserve/CITYTO}"/>						
 						<Label text="Flight Date"/>
-						<Text text="{ path : 'reserveModel>/reserve/fldate', formatter : '.formatDate' }"/>		
+						<Text text="{ path : 'reserveModel>/reserve/FLDATE', formatter : '.formatDate' }"/>		
 						<Label text="Departure Time"/>
-						<Text text="{ path : 'reserveModel>/reserve/deptime', formatter : '.formatTime' }"/>		
+						<Text text="{
+							path: 'reserveModel>/reserve/DEPTIME', 
+							type: 'sap.ui.model.odata.type.Time', 
+							formatOptions: { style: 'long', pattern: 'HH:mm', UTC : false},
+							source: { pattern: 'HH:mm:ss' }
+						}" />	
 						<Label text="Arrival Time"/>
-						<Text text="{ path : 'reserveModel>/reserve/arrtime', formatter : '.formatTime' }"/>	
+						<Text text="{
+							path: 'reserveModel>/reserve/ARRTIME', 
+							type: 'sap.ui.model.odata.type.Time', 
+							formatOptions: { style: 'long', pattern: 'HH:mm', UTC : false},
+							source: { pattern: 'HH:mm:ss' }
+						}" />							
 						<Label text="Passenger"/>
 						<Text text="{routerModel>/Passenger}"/>	
 
@@ -253,11 +346,11 @@
 							intro="This is the total cost of your journey"
 							titleLevel="H1"
 							number="{
-								parts:[{path:'reserveModel>/total'},{path:'reserveModel>/reserve/currency'}],
+								parts:[{path:'reserveModel>/total'},{path:'reserveModel>/reserve/CURRENCY'}],
 								type: 'sap.ui.model.type.Currency',
 								formatOptions: {showMeasure: false}
 							}"
-							numberUnit="{reserveModel>/reserve/currency}"	
+							numberUnit="{reserveModel>/reserve/CURRENCY}"	
 							numberState="Information"	
 							>
 						</ObjectHeader>					
@@ -322,19 +415,93 @@
 						minWidth="1024"
 						editable="false"
 						layout="ResponsiveGridLayout">
+					</form:SimpleForm>
+
+					<form:SimpleForm
+					    id = "prForm1"
+						title="Passenger 1"
+						minWidth="1024"
+						editable="false"
+						layout="ResponsiveGridLayout">
 						<form:content>								
 							<Label text="Passport No."/>
-							<Text text="{reserveModel>/passenger/passportNo}"/>
+							<Text text="{passengerInfoModel>/0/PASSPORTNO}"/>
 							<Label text="Name"/>
-							<Text text="{reserveModel>/passenger/name}"/>
+							<Text text="{passengerInfoModel>/0/NAME}"/>
 							<Label text="Gender"/>
-							<Text text="{genderCombo>/selectedKey}"/>
+							<Text text="{passengerInfoModel>/0/GENDER}"/>
 							<Label text="Country"/>
-							<Text text="{reserveModel>/passenger/country}"/>
+							<Text text="{passengerInfoModel>/0/COUNTRY}"/>
 							<Label text="Birth"/>
-							<Text text="{reserveModel>/passenger/birth}"/>							
+							<Text text="{passengerInfoModel>/0/BIRTH}"/>							
 							<Label text="Passport Expire Date"/>
-							<Text text="{reserveModel>/passenger/expire}"/>							
+							<Text text="{passengerInfoModel>/0/EXPIRE}"/>							
+							<Link press="handleNavBackToPassenger" text="Edit"/>
+						</form:content>
+					</form:SimpleForm>
+					<form:SimpleForm
+					    id = "prForm2"
+						title="Passenger 2"
+						minWidth="1024"
+						editable="false"
+						layout="ResponsiveGridLayout">
+						<form:content>								
+							<Label text="Passport No."/>
+							<Text text="{passengerInfoModel>/1/PASSPORTNO}"/>
+							<Label text="Name"/>
+							<Text text="{passengerInfoModel>/1/NAME}"/>
+							<Label text="Gender"/>
+							<Text text="{passengerInfoModel>/1/GENDER}"/>
+							<Label text="Country"/>
+							<Text text="{passengerInfoModel>/1/COUNTRY}"/>
+							<Label text="Birth"/>
+							<Text text="{passengerInfoModel>/1/BIRTH}"/>							
+							<Label text="Passport Expire Date"/>
+							<Text text="{passengerInfoModel>/1/EXPIRE}"/>							
+							<Link press="handleNavBackToPassenger" text="Edit"/>
+						</form:content>
+					</form:SimpleForm>
+					<form:SimpleForm
+					    id = "prForm3"
+						title="Passenger 3"
+						minWidth="1024"
+						editable="false"
+						layout="ResponsiveGridLayout">
+						<form:content>								
+							<Label text="Passport No."/>
+							<Text text="{passengerInfoModel>/2/PASSPORTNO}"/>
+							<Label text="Name"/>
+							<Text text="{passengerInfoModel>/2/NAME}"/>
+							<Label text="Gender"/>
+							<Text text="{passengerInfoModel>/2/GENDER}"/>
+							<Label text="Country"/>
+							<Text text="{passengerInfoModel>/2/COUNTRY}"/>
+							<Label text="Birth"/>
+							<Text text="{passengerInfoModel>/2/BIRTH}"/>							
+							<Label text="Passport Expire Date"/>
+							<Text text="{passengerInfoModel>/2/EXPIRE}"/>							
+							<Link press="handleNavBackToPassenger" text="Edit"/>
+						</form:content>
+					</form:SimpleForm>
+					<form:SimpleForm
+					    id = "prForm4"
+						title="Passenger 4"
+						minWidth="1024"
+						editable="false"
+						layout="ResponsiveGridLayout">
+						<form:content>								
+							<Label text="Passport No."/>
+							<Text text="{passengerInfoModel>/3/PASSPORTNO}"/>
+							<Label text="Name"/>
+							<Text text="{passengerInfoModel>/3/NAME}"/>
+							<Label text="Gender"/>
+							<Text text="{passengerInfoModel>/3/GENDER}"/>
+							<Label text="Country"/>
+							<Text text="{passengerInfoModel>/3/COUNTRY}"/>
+							<Label text="Birth"/>
+							<Text text="{passengerInfoModel>/3/BIRTH}"/>							
+							<Label text="Passport Expire Date"/>
+							<Text text="{passengerInfoModel>/3/EXPIRE}"/>							
 							<Link press="handleNavBackToPassenger" text="Edit"/>
 						</form:content>
 					</form:SimpleForm>

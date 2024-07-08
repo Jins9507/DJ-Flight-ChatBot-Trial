@@ -20,26 +20,26 @@
 					<f:breadcrumbs>
 						<Breadcrumbs>
 							<Link text="Home" press = "onNavigationBackPress"/>
-							<Link text="My Reservation" />
+							<!-- <Link text="My Reservation" /> -->
 						</Breadcrumbs>
 					</f:breadcrumbs>
 					<f:expandedContent>
-						<Label text="Maybe Search condition date input"/>
+						<Label text="Welcome! {userModel>/USERNAME}. "/>
 					</f:expandedContent>
 					<f:snappedContent>
-						<Label text="{routerModel>/locationFromName} - {routerModel>/locationToName}, {routerModel>/Passenger} Person"/>
+						<Label text="{routerModel>/LocationFromName} - {routerModel>/LocationToName}, {routerModel>/Passenger} Person"/>
 					</f:snappedContent>
 					<f:snappedTitleOnMobile>
 						<Title text="This is a subheading"/>
 					</f:snappedTitleOnMobile>
 					<f:content>
 						<OverflowToolbar>
-							<GenericTag text = "{= ${mockUser>/class}?${mockUser>/class}:'Non-Member'}"
-								status="{= ${mockUser>/class} === 'Gold Member' ? 'Warning' : (${mockUser>/class} === 'Silver Member' ? 'None' : 'Success')}"
+							<GenericTag text = "{= !!${userModel>/CLASS}?${userModel>/CLASS}:'Non-Member'}"
+								status="{= ${userModel>/CLASS} === 'Gold Member' ? 'Warning' : (${userModel>/CLASS} === 'Silver Member' ? 'None' : 'Success')}"
 								press="onPressOpenPopover"
 								design="StatusIconHidden">
 								<ObjectNumber number="|"
-									unit="VIP"
+									unit="{userModel>/SUBSCRIPTION}"
 									emphasized="false"
 									state="Error"/>
 							</GenericTag>
@@ -100,7 +100,7 @@
 						</layout:VerticalLayout>
 						<layout:VerticalLayout>
 							<ObjectAttribute title="Availability"/>
-							<ObjectStatus text="Total {=${testModel>/testTable}.length} Schedule Available in DJ Flight" state="Success"/>
+							<ObjectStatus text="Total {scheduleModel>/tableL} Schedule Available in DJ Flight" state="Success"/>
 						</layout:VerticalLayout>
 					</layout:HorizontalLayout>
                     <fb:FilterBar id="filterbar" persistencyKey="myPersKey" useToolbar="false" search=".onFilterSearch" showFilterConfiguration="false" filterChange=".onFilterChange" afterVariantLoad=".onAfterVariantLoad">
@@ -140,20 +140,29 @@
                                             path: 'filterModel>/Destination',
                                             sorter: { path: 'filterModel>Country' },
                                             templateShareable: true
-                                        }"
-                                    >
+                                    }">
                                         <core:Item key="{filterModel>AirportID}" text="{filterModel>Country}"/>
                                     </Select>
                                 </fb:control>
                             </fb:FilterGroupItem>
                             <fb:FilterGroupItem name="SupplierName" label="Passenger" groupName="Group1" visibleInFilterBar="true">
                                 <fb:control>
-                                    <Input
+                                    <Select
+                                        name="passenger"
+                                        selectedKey="{filterModel>/DefaultP}"
+                                        items="{
+                                            path: 'filterModel>/Passenger',
+                                            sorter: { path: 'filterModel>number' },
+                                            templateShareable: true
+                                    }">
+                                        <core:Item key="{filterModel>number}" text="{filterModel>number}" />
+                                    </Select>
+                                    <!-- <Input
                                         id="Passenger"
                                         value="{filterModel>/Passenger}"
                                         type = "Number"
                                         editable="true"	
-                                        width="30%"/>	
+                                        width="30%"/>	 -->
                                 </fb:control>
                             </fb:FilterGroupItem>
                         </fb:filterGroupItems>
@@ -166,8 +175,8 @@
                 noData="No Flight schedule"
                 rows="{
 					path: 'scheduleModel>/results',						
-					sorter: [
-						{path: 'carrid'}, {path: 'connid'} 
+					sorter: [  
+						{path: 'FLDATE'}, {path: 'DEPTIME'}, {path: 'CARRID'}, {path: 'CONNID'} 
 					]
 				}"
                 threshold = "50"
@@ -182,9 +191,9 @@
                     <OverflowToolbar design="Transparent">
                         <Title text="Search {scheduleModel>/tableL} Rows" />
                         <ToolbarSpacer/>
-                        <Button text="Test Button" type="Transparent" press=".onTestPress"/>
+                        <!-- <Button text="Test Button" type="Transparent" press=".onTestPress"/>
                         <Button text="Test Button2" type="Emphasized" press=".onTestPress"/>
-                        <Button text="Test Button3" type="Attention" press=".onTestPress"/>
+                        <Button text="Test Button3" type="Attention" press=".onTestPress"/> -->
                         <Button icon="sap-icon://ai" press=".onExportPress" />
                     </OverflowToolbar>
                 </t:extension>
@@ -195,130 +204,142 @@
                 </t:rowActionTemplate>
                 <t:columns>
                     <!-- Airline -->
-                    <t:Column hAlign="Center" width="4rem" sortProperty="carrid" filterProperty="carrid">
+                    <t:Column hAlign="Center" width="4rem" sortProperty="CARRID" filterProperty="CARRID">
                         <Label text="Airline"/>
                         <t:template>
                             <Text text="{
-                                path: 'testModel>carrid',
+                                path: 'scheduleModel>CARRID',
                                 type: 'sap.ui.model.type.String'
                             }"/>
                         </t:template>
                     </t:Column>
                     <!-- Flight Code -->
-                    <t:Column hAlign="Center" width="6em" sortProperty="connid" filterProperty="connid" >
+                    <t:Column hAlign="Center" width="6em" sortProperty="CONNID" filterProperty="CONNID" >
                         <Label text="Flight Code" textAlign="Center"/>
                         <t:template>
-                            <Text text="{testModel>connid}" wrapping="false" textAlign="Left"/>
+                            <Text text="{scheduleModel>CONNID}" wrapping="false" textAlign="Left"/>
                         </t:template>
                     </t:Column>
                     <!-- Departure -->
-                    <t:Column  width="8em" hAlign="Left" sortProperty="cityfrom" filterProperty="cityfrom">
+                    <t:Column  width="8em" hAlign="Left" sortProperty="CITYFROM" filterProperty="CITYFROM">
                         <Label text="Departure" />
                         <t:template>
-                            <Text text="{testModel>cityfrom}" wrapping="false"/>
+                            <Text text="{scheduleModel>CITYFROM}" wrapping="false"/>
                         </t:template>
                     </t:Column>
                     <!-- Arrival -->
-                    <t:Column  width="8em" hAlign="Left" sortProperty="cityto" filterProperty="cityto">
+                    <t:Column  width="8em" hAlign="Left" sortProperty="CITYTO" filterProperty="CITYTO">
                         <Label text="Arrival" />
                         <t:template>
-                            <Text text="{testModel>cityto}" wrapping="false"/>
+                            <Text text="{scheduleModel>CITYTO}" wrapping="false"/>
                         </t:template>
                     </t:Column>
                     <!-- Flight Date -->
-                    <t:Column  width="6em" hAlign="Left" sortProperty="fldate" filterProperty="fldate">
+                    <t:Column  width="6em" hAlign="Left" sortProperty="FLDATE" filterProperty="FLDATE">
                         <Label text="Flight Date" />
                         <t:template>
                             <Text text="{
-								path : 'testModel>fldate',
+								path : 'scheduleModel>FLDATE',
                                 formatter : '.formatDate'
 							}" wrapping="false"/>
                         </t:template>
                     </t:Column>
                     <!-- Departure Time -->
-                    <t:Column  width="5em" hAlign="Center" sortProperty="deptime" filterProperty="deptime">
+                    <t:Column  width="5em" hAlign="Center" sortProperty="DEPTIME" filterProperty="DEPTIME">
                         <Label text="Dep.Time" />
                         <t:template>
-                            <Text text="{ path : 'testModel>deptime', formatter : '.formatTime' }" wrapping="false"/>
+                            <Text text="{
+                                path: 'scheduleModel>DEPTIME', 
+                                type: 'sap.ui.model.odata.type.Time', 
+                                formatOptions: { style: 'long', pattern: 'HH:mm', UTC : false},
+                                source: { pattern: 'HH:mm:ss' }
+                            }" />
+                            <!-- <Text text="{ path : 'scheduleModel>DEPTIME', type: new sap.ui.model.odata.type.Time({ source : { __edmtype: "Edm.Time" }, pattern: "HH:MM:SS" }) } " wrapping="false"/> -->
                         </t:template>
                     </t:Column>
                     <!-- Arrival Time -->
-                    <t:Column  width="5em" hAlign="Center" sortProperty="arrtime" filterProperty="arrtime">
+                    <t:Column  width="5em" hAlign="Center" sortProperty="ARRTIME" filterProperty="ARRTIME">
                         <Label text="Arr.Time" />
                         <t:template>
-                            <Text text="{ path : 'testModel>arrtime', formatter : '.formatTime' }" wrapping="false"/>
+                            <Text text="{
+                                path: 'scheduleModel>ARRTIME', 
+                                type: 'sap.ui.model.odata.type.Time', 
+                                formatOptions: { style: 'long', pattern: 'HH:mm', UTC : false},
+                                source: { pattern: 'HH:mm:ss' }
+                            }" />
+                            <!-- <Text text="{ path : 'scheduleModel>ARRTIME', formatter : '.formatTime' }" wrapping="false"/> -->
                             <!-- <Text text="{testModel>arrtime}" wrapping="false"/> -->
                         </t:template>
                     </t:Column>
                     <!-- Economy -->
-                    <t:Column width="5em" hAlign="Center" sortProperty="seatocc" filterProperty="seatocc">
+                    <t:Column width="5em" hAlign="Center" sortProperty="SEATOCC" filterProperty="SEATOCC">
                         <Label text="Economy" />
                         <t:template>
-                            <Text text="{testModel>seatocc}" wrapping="false" />
+                            <Text text="{scheduleModel>SEATOCC}" wrapping="false" />
                         </t:template>
                     </t:Column>
                     <!-- Economy Fare -->
-                    <t:Column  width="4em" hAlign="Left" visible = "true" sortProperty="price" filterProperty="price">
+                    <t:Column  width="4em" hAlign="Left" visible = "true" sortProperty="PRICE" filterProperty="PRICE">
                         <Label text="Fare" />
                         <t:template>
                             <!-- <Text text="{testModel>price}" wrapping="false"/> -->
                             <ObjectNumber
                                 class="sapUiSmallMarginBottom"
-                                binding="{testModel}"
+                                binding="{scheduleModel}"
                                 number="{
-                                        parts:[{path:'testModel>price'},{path:'testModel>currency'}],
+                                        parts:[{path:'scheduleModel>PRICE'},{path:'scheduleModel>CURRENCY'}],
                                         type: 'sap.ui.model.type.Currency',
                                         formatOptions: {showMeasure: false}
                                     }"
-                                unit="{testModel>currency}"
+                                unit="{scheduleModel>CURRENCY}"
                                 state="Warning" />
                         </t:template>
                     </t:Column>
                     <!-- Business -->
-                    <t:Column  width="5em" hAlign="Center" visible = "true" sortProperty="seatocc_b" filterProperty="seatocc_b">
+                    <t:Column  width="5em" hAlign="Center" visible = "true" sortProperty="SEATOCC_B" filterProperty="SEATOCC_B">
                         <Label text="Business" />
                         <t:template>
-                            <Text text="{testModel>seatocc_b}" wrapping="false"/>
+                            <Text text="{scheduleModel>SEATOCC_B}" wrapping="false"/>
                         </t:template>
                     </t:Column>
                     <!-- Business Fare -->
-                    <t:Column hAlign="Center" width="4em" sortProperty="price_b" filterProperty="price_b">
+                    <t:Column hAlign="Center" width="4em" sortProperty="PRICE_B" filterProperty="PRICE_B">
                         <Text text="Fare" /> 
                         <t:template>
                             <!-- <Text text="{testModel>price_b}" /> -->
                             <ObjectNumber
                                 class="sapUiSmallMarginBottom"
-                                binding="{testModel}"
+                                binding="{scheduleModel}"
                                 number="{
-                                        parts:[{path:'testModel>price_b'},{path:'testModel>currency'}],
+                                        parts:[{path:'scheduleModel>PRICE_B'},{path:'scheduleModel>CURRENCY'}],
                                         type: 'sap.ui.model.type.Currency',
                                         formatOptions: {showMeasure: false}
                                     }"
-                                unit="{testModel>currency}"
+                                unit="{scheduleModel>CURRENCY}"
                                 state="Success" />                            
                         </t:template>
                     </t:Column>
                     <!-- First -->
-                    <t:Column  width="4em" hAlign="Center" visible = "true" sortProperty="seatocc_f" filterProperty="seatocc_f">
+                    <t:Column  width="4em" hAlign="Center" visible = "true" sortProperty="SEATOCC_F" filterProperty="SEATOCC_F">
                         <Label text="First" />
                         <t:template>
-                            <Text text="{testModel>seatocc_f}" wrapping="false"/>
+                            <Text text="{scheduleModel>SEATOCC_F}" wrapping="false"/>
                         </t:template>
                     </t:Column>
                     <!-- First Fare -->
-                    <t:Column hAlign="Center" width="4em" sortProperty="price_f" filterProperty="price_f">
+                    <t:Column hAlign="Center" width="4em" sortProperty="PRICE_F" filterProperty="PRICE_F">
                         <Text text="Fare" /> 
                         <t:template>
                             <!-- <Text text="{testModel>price_f}" /> -->
                             <ObjectNumber
                                 class="sapUiSmallMarginBottom"
-                                binding="{testModel}"
+                                binding="{scheduleModel}"
                                 number="{
-                                        parts:[{path:'testModel>price_f'},{path:'testModel>currency'}],
+                                        parts:[{path:'scheduleModel>PRICE_F'},{path:'scheduleModel>CURRENCY'}],
                                         type: 'sap.ui.model.type.Currency',
                                         formatOptions: {showMeasure: false}
                                     }"
-                                unit="{testModel>currency}"
+                                unit="{scheduleModel>CURRENCY}"
                                 state="Information" />                            
                         </t:template>
                     </t:Column>

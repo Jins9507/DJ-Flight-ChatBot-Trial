@@ -56,14 +56,25 @@
                 <core:Item key="{filterModel>AirportID}" text="{filterModel>Country}" />
             </Select>
             <tnt:InfoLabel id="l3" text="Passenger" renderMode="Loose" colorScheme="5" icon="sap-icon://group" class="sapUiSmallMargin"/>						
-            <Input
+            <Select
+                id="Passenger"
+                class="sapUiSmallMargin"
+                forceSelection="false"
+                selectedKey="{filterModel>/DefaultP}"
+                items="{
+                    path: 'filterModel>/Passenger',
+                    sorter: { path: 'filterModel>number' }
+                }">
+                <core:Item key="{filterModel>number}" text="{filterModel>number}" />
+            </Select>
+            <!-- <Input
                 id="Passenger"
                 class="sapUiSmallMargin"
                 required = "true"
                 value="{filterModel>/Passenger}"
                 type = "Number"
                 editable="true"	
-                width="30%"/>	
+                width="30%"/>	 -->
             <Button
                 text="Search"
                 press=".onSearchFilter"

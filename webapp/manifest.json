@@ -81,6 +81,18 @@
       "filterModel": {
         "dataSource": "filterModel",
         "type": "sap.ui.model.json.JSONModel"
+      },
+      "userModel": {
+        "type": "sap.ui.model.json.JSONModel",
+        "settings": {}
+      },
+      "reservationModel": {
+        "type": "sap.ui.model.json.JSONModel",
+        "settings": {}
+      },
+      "passengerModel": {
+        "type": "sap.ui.model.json.JSONModel",
+        "settings": {}
       }
     },
     "resources": {
