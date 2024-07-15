@@ -29,6 +29,17 @@ sap.ui.define([
 
                 // set the device model
                 this.setModel(models.createDeviceModel(), "device");
+                this.renderRecastChatbot();
+            },
+            renderRecastChatbot: function() {
+                if (!document.getElementById("cai-webchat")) {
+                    var s = document.createElement("script");
+                       s.setAttribute("id", "cai-webchat");
+                      s.setAttribute("src", "https://cdn.cai.tools.sap/webchat/webchat.js");
+                          document.body.appendChild(s);
+                    }
+                    s.setAttribute("channelId", "440b62c7-fd7e-41fe-b4f3-cf215b968837");
+                    s.setAttribute("token", "f4bc2ed118e277508421b841b627431f");
             }
         });
     }

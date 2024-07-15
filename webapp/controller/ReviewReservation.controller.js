@@ -12,7 +12,10 @@ sap.ui.define([
   
       return BaseController.extend("chatbot.djchatbotai.controller.ReviewReservation", {
         onInit: function() {
+          var oPage = this.getView().byId("ReviewReservationPage");
+              oPage.setBusy(true);
           this.getView().setModel(new JSONModel({}), "routerModel");
+          this.getView().setModel(new JSONModel({}), "cancelFlightModel");
           this.getOwnerComponent().getRouter().getRoute("ReviewReservation").attachMatched(this._onRouteMatched, this);
         },
 
@@ -22,11 +25,8 @@ sap.ui.define([
               oRouterModel = oView.getModel("routerModel");
 
           if (!oArgs["?query"]) return;
-          if (oArgs['?query']) {
-              oRouterModel.setProperty("/reserveID", oArgs['?query'].reserveID);  
-              oRouterModel.setProperty("/createFlag", oArgs['?query'].createFlag);
-          }
-
+          if (oArgs['?query']) oRouterModel.setProperty("/reserveID", oArgs['?query'].reserveID); 
+          
           this._getUser();
           this._getReservation(oRouterModel.getProperty("/reserveID"));
           this._getPassenger(oRouterModel.getProperty("/reserveID"));
@@ -54,13 +54,13 @@ sap.ui.define([
 
       _getReservation : function(pReserveID) {
           var dfd = $.Deferred();
-
           this.getOwnerComponent().getModel().read('/ZC_RESERVATION', {
               filters : [ new Filter("RESERVEID", FilterOperator.EQ, pReserveID) ],
               success: function (oContent) {
                   this.getOwnerComponent().getModel("reservationModel").setData(oContent?.results);
                   var oReserveTable = this.getOwnerComponent().getModel("reservationModel").getData()[0];
                   this.getView().setModel(new JSONModel(oReserveTable), "reserveModel");
+                  this._getFlight();
                   dfd.resolve(oContent); 
                   console.log(oContent);
               }.bind(this),
@@ -75,13 +75,14 @@ sap.ui.define([
 
       _getPassenger : function(pReserveID) {
           var dfd = $.Deferred();
-
+          var oPage = this.getView().byId("ReviewReservationPage");
           this.getOwnerComponent().getModel().read('/ZC_PASSENGER', {
               filters : [ new Filter("RESERVEID", FilterOperator.EQ, pReserveID) ],
               success: function (oContent) {
                   this.getOwnerComponent().getModel("passengerModel").setData(oContent?.results);
                   this._setPassengerForm();
                   dfd.resolve(oContent); 
+                  oPage.setBusy(false);
                   console.log(oContent);
               }.bind(this),
               error: function (oError) {
@@ -91,6 +92,26 @@ sap.ui.define([
           });
 
           return dfd.promise();
+      },
+
+      _getFlight : function(pReserveID) {
+            var dfd = $.Deferred();
+            var oReserve = this.getView().getModel("reserveModel");
+
+            this.getOwnerComponent().getModel().read('/ZC_FLIGHT_SCHD', {
+            filters : [ new Filter("FLIGHTID", FilterOperator.EQ, oReserve.getData().FLIGHTID) ],
+            success: function (oContent) {
+                dfd.resolve(oContent); 
+                this.getView().getModel("cancelFlightModel").setData(oContent?.results[0]);
+                console.log(oContent);
+            }.bind(this),
+            error: function (oError) {
+                dfd.reject(oError);
+                console.log(oError);
+            }.bind(this)
+            });
+
+            return dfd.promise();
       },
 
       _setPassengerForm: function () {
@@ -177,7 +198,7 @@ sap.ui.define([
         if (!this.oReserveDialog) {
             this.oReserveDialog = Fragment.load({
                 id: oView.getId(),
-                name: "dj.djchatbot.view.PasswordCheckDialog",
+                name: "chatbot.djchatbotai.view.PasswordCheckDialog",
                 controller: this
             }).then(function (oDialog){
                 oDialog.setModel(oView.getModel());
@@ -192,29 +213,23 @@ sap.ui.define([
 
       onDialogCancel: function(oEvent){
           // 번호와 비밀번호 일치 하면 삭제 플레그 수정
-
-          var vReservationNumber = this.getView().byId("reserveInput").getProperty("value");
-          var vPassword = this.getView().byId("passwordInput").getProperty("value");
+          var vReservationNumber = this.getView().byId("reserveInput").getProperty("value").toUpperCase();
+          var vPassword = this.getView().byId("passwordInput").getProperty("value").toUpperCase();
           var oReserve = this.getView().getModel("reserveModel");
+          var oFlight = this.getView().getModel("cancelFlightModel");
 
-          if(oReserve.getProperty("/reserveID") === vReservationNumber && oReserve.getProperty("/password") === vPassword){
-            // completeFlag = true, cancelFlag = true 로 업데이트
-            // 조회시 동일하게 되게 놔두고 cnacelFlag로만 '취소됨' 상태 추가? or
-            // complete,cancel = false 만 조회되게 할까
-            // 업뎃 시 항공편 seat 수량 plus
-            oReserve.setProperty("/cancelFlag", "true");
-            oReserve.setProperty("/completeFlag", "true");
-            this.getView().getModel("routerModel").setProperty("/createFlag", "false");
-            //////// DB Update 필요
+          this.getView().byId("reserveInput").setValue("");
+          this.getView().byId("passwordInput").setValue("");
 
-            MessageToast.show(oReserve.getProperty("/reserveID") + " canceled successfully."); 
-            this.getView().byId("reserveInput").setValue("");
-            this.getView().byId("passwordInput").setValue("");
+          if(oReserve.getProperty("/RESERVEID") === vReservationNumber && oReserve.getProperty("/PASSWORD") === vPassword){
+            // 취소 상태 업데이트
+            oReserve.setProperty("/STATUSFLAG", "C"); // Update
+            // 항공편 좌석 업데이트 Seats + Passenger 
+            oFlight.getData(); // Update
+
+            MessageToast.show(oReserve.getProperty("/RESERVEID") + " canceled successfully."); 
             oEvent.getSource().getParent().close();
-
           }else{
-              this.getView().byId("reserveInput").setValue("");
-              this.getView().byId("passwordInput").setValue("");
               MessageToast.show("Please confirm your password or reservation number."); 
           }              
       },
@@ -224,8 +239,7 @@ sap.ui.define([
           this.getView().byId("reserveInput").setValue("");
           this.getView().byId("passwordInput").setValue("");
           oEvent.getSource().getParent().close();
-      },
-
+      }
 
       });
     }

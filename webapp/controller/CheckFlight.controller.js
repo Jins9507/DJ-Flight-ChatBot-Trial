@@ -225,8 +225,8 @@ sap.ui.define([
             },
 
             onDialogSearch: function(){
-                var vReservationNumber = this.getView().byId("reserveInput").getProperty("value")
-                var vPassword = this.getView().byId("passwordInput").getProperty("value")
+                var vReservationNumber = this.getView().byId("reserveInput").getProperty("value").toUpperCase();
+                var vPassword = this.getView().byId("passwordInput").getProperty("value").toUpperCase();
                 var resultR;
 
                 var oReserveTable = this.getOwnerComponent().getModel("reservationModel");
@@ -234,40 +234,32 @@ sap.ui.define([
                     return n.RESERVEID
                 }));
 
+                this.getView().byId("reserveInput").setValue("");
+                this.getView().byId("passwordInput").setValue("");
+
                 if(indexR !== -1){
                     resultR = oReserveTable.getProperty("/"+indexR);
                     if(resultR.PASSWORD === vPassword){
                         switch (resultR.STATUSFLAG) {
                             case "S":
-                                this.getView().byId("reserveInput").setValue("");
-                                this.getView().byId("passwordInput").setValue("");
                                 MessageToast.show("The reservation has already been completed.");                                 
                                 break;
                             case "C":
-                                this.getView().byId("reserveInput").setValue("");
-                                this.getView().byId("passwordInput").setValue("");
                                 MessageToast.show("The reservation has already been canceled.");                                 
                                 break;
                             case "P":
                             case "N":
                                 this.getOwnerComponent().getRouter().navTo("ReviewReservation", {                
                                     "?query": {
-                                        reserveID   : vReservationNumber,
-                                        createFlag  : "false"
+                                        reserveID   : vReservationNumber
                                     }                
                                 });                                    
                                 break;
                         }
-                    }else{
-                        this.getView().byId("reserveInput").setValue("");
-                        this.getView().byId("passwordInput").setValue("");
-                        MessageToast.show("Please confirm your password or reservation number."); 
-                    } 
-                }else{
-                    this.getView().byId("reserveInput").setValue("");
-                    this.getView().byId("passwordInput").setValue("");
-                    MessageToast.show("Please confirm your password or reservation number."); 
-                }                
+                        return;
+                    }
+                }         
+                MessageToast.show("Please confirm your password or reservation number.");           
             },
 
             onDialogClose: function(oEvent){
