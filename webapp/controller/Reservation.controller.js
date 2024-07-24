@@ -508,35 +508,35 @@ sap.ui.define([
                 // }
 
 
-                $.ajax({
-                    url: "/sap/opu/odata/sap/ZUI_C_TRAVEL_DJ_010/$metadata",
-                    type: "GET",
-                    beforSend: function (xhr) {
-                        xhr.setRequestHeader("X-CSRF-Token", "Fetch");
-                    },
-                    complete: function (xhr) {
-                        var _oToken = xhr.getResponseHeader("X-CSRF-Token");
-                        console.log(_oToken);
-                        $.ajax({
-                            url: "/sap/opu/odata/sap/ZUI_C_TRAVEL_DJ_010/ZC_PASSENGER",
-                            method: "POST",
-                            data: JSON.stringify(passengerInfo),
-                            contentType: "application/json",
-                            beforeSend: function(xhr){
-                                xhr.setRequestHeader("X-CSRF-Token", _oToken);
-                            },
-                            success: function (success){
-                                console.log(success);
-                            },
-                            error: function(error){
-                                console.log("error2",error)
-                            }
-                        })
-                    },
-                    error: function(error){
-                        console.log("error1",error)
-                    }
-                })
+                // $.ajax({
+                //     url: "/sap/opu/odata/sap/ZUI_C_TRAVEL_DJ_010/$metadata",
+                //     type: "GET",
+                //     beforSend: function (xhr) {
+                //         xhr.setRequestHeader("X-CSRF-Token", "Fetch");
+                //     },
+                //     complete: function (xhr) {
+                //         var _oToken = xhr.getResponseHeader("X-CSRF-Token");
+                //         console.log(_oToken);
+                //         $.ajax({
+                //             url: "/sap/opu/odata/sap/ZUI_C_TRAVEL_DJ_010/ZC_PASSENGER",
+                //             method: "POST",
+                //             data: JSON.stringify(passengerInfo),
+                //             contentType: "application/json",
+                //             beforeSend: function(xhr){
+                //                 xhr.setRequestHeader("X-CSRF-Token", _oToken);
+                //             },
+                //             success: function (success){
+                //                 console.log(success);
+                //             },
+                //             error: function(error){
+                //                 console.log("error2",error)
+                //             }
+                //         })
+                //     },
+                //     error: function(error){
+                //         console.log("error1",error)
+                //     }
+                // })
 
                 // var _getToken = getBearerToken();
                 // 403 Error
@@ -622,6 +622,7 @@ sap.ui.define([
                         })
                         this.getView().byId("dynamicPage").setBusy(false); 
                         this.getView().setBusy(true);
+                        var vReserveID = 'DJR000007';
                         this.getOwnerComponent().getRouter().navTo("ReviewReservation", {                
                             "?query": {
                                 reserveID   : vReserveID,
